@@ -1,0 +1,16 @@
+# Java / Maven
+target/
+*.class
+
+# Eclipse
+.settings/
+.classpath
+.project
+
+# Sensitive configuration
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
