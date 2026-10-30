@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediTrack - View Records</title>
+    <link rel="stylesheet" href="css/records.css">
+</head>
+<body>
+<main class="wrap wide">
+
+    <header class="topbar">
+        <span class="brand">MediTrack</span>
+        <div class="line"></div>
+        <span class="user" id="userName" title="Logged in user"></span>
+        <button type="button" id="homeBtn" class="nav-btn">home</button>
+        <button type="button" id="viewBtn" class="nav-btn active" aria-current="page">view</button>
+        <button type="button" id="billBtn" class="nav-btn">bill</button>
+        <button type="button" id="recordBtn" class="nav-btn">record</button>
+        <button type="button" id="logoutBtn" class="nav-btn">logout</button>
+    </header>
+
+    <p id="scopeNote" class="note" hidden></p>
+    <p id="viewMsg" class="msg" role="alert"></p>
+
+    <!-- Filter dropdowns (left) and the download button (right, directly under logout) -->
+    <div class="toolbar">
+        <div id="filters" class="filters" role="group" aria-label="Filters"></div>
+        <button type="button" id="downloadBtn" class="nav-btn">download</button>
+    </div>
+
+    <div class="table-wrap" tabindex="0" aria-label="Saved records">
+        <table class="data">
+            <thead><tr id="headRow"></tr></thead>
+            <tbody id="rowsBody"></tbody>
+        </table>
+    </div>
+</main>
+
+<!-- Attachment preview popup -->
+<div id="previewModal" class="modal" aria-hidden="true">
+    <div class="modal-box preview" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+        <div class="preview-head">
+            <h2 id="previewTitle"></h2>
+            <div class="preview-actions">
+                <a id="previewDownload" class="btn small" href="#">Download</a>
+                <button type="button" id="previewClose" class="btn small secondary">Close</button>
+            </div>
+        </div>
+        <div id="previewBody" class="preview-body"></div>
+    </div>
+</div>
+
+<script src="js/nav.js"></script>
+<script src="js/view.js"></script>
+</body>
+</html>

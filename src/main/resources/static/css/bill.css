@@ -1,0 +1,491 @@
+/* Bill page (page 4). Loaded after records.css, so the header, buttons, popups and inputs match the other pages. */
+
+.page-title {
+    margin: 0 0 4px;
+    font-size: 30px;
+}
+
+.page-sub {
+    margin: 0 0 18px;
+    color: #a9cdff;
+    font-size: 15px;
+}
+
+.bill-layout {
+    display: grid;
+    grid-template-columns: minmax(330px, 410px) minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+}
+
+.panel {
+    padding: 18px 18px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 12px;
+    background: rgba(4, 16, 44, 0.82);
+}
+
+.panel h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+}
+
+.hint {
+    margin: 0 0 14px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #a9cdff;
+}
+
+/* ---------- Fields ---------- */
+.fld {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    margin-bottom: 12px;
+}
+
+.fld-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 18px;
+}
+
+.fld label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--c, #fff);
+    flex-shrink: 0;
+}
+
+.here {
+    display: none;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #8fc0ff;
+}
+
+.fld.active .here {
+    display: inline;
+}
+
+/* the three small boxes are too narrow for the tag; the coloured outline shows the active one */
+.trio .fld.active .here {
+    display: none;
+}
+
+.fld .input {
+    height: 38px;
+}
+
+.fld.active .input {
+    outline: 2px solid var(--c, #6fb0ff);
+    outline-offset: 0;
+}
+
+.fld .input.flash {
+    animation: flash 0.7s ease-out;
+}
+
+@keyframes flash {
+    from { box-shadow: 0 0 0 4px var(--c, #6fb0ff); }
+    to { box-shadow: 0 0 0 0 transparent; }
+}
+
+.input.bad {
+    outline: 2px solid #ff8a8a;
+}
+
+.sub-title {
+    margin: 18px 0 10px;
+    font-size: 16px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* hide number spinners: the numbers are mostly filled from the bill */
+input[type="number"].input {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+input[type="number"].input::-webkit-outer-spin-button,
+input[type="number"].input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* ---------- Products ---------- */
+.prod {
+    margin-bottom: 12px;
+    padding: 10px 12px 2px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.prod-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: #a9cdff;
+}
+
+.rm {
+    width: 26px;
+    height: 26px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    background: transparent;
+    color: #fff;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.rm:hover {
+    background: #8a2330;
+}
+
+.trio {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.1fr;
+    gap: 8px;
+}
+
+.line-total {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 38px;
+    padding: 0 10px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.add-product {
+    width: 100%;
+    height: 38px;
+    border-style: dashed;
+}
+
+.total-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 16px 0 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #0b3a8a;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.total-label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 700;
+}
+
+.total-label small {
+    font-weight: 400;
+    font-size: 12px;
+    color: #c8dcff;
+}
+
+.total-value {
+    font-size: 24px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.actions.tight {
+    margin-top: 16px;
+}
+
+.modal-actions.spaced {
+    margin-top: 16px;
+}
+
+#wordInput {
+    height: 38px;
+}
+
+/* ---------- Image panel ---------- */
+.img-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.img-toolbar .spacer {
+    flex: 1;
+}
+
+.tool {
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.tool:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.tool:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.tool.primary {
+    background: #6fb0ff;
+    border-color: #6fb0ff;
+    color: #04163a;
+}
+
+.tool.primary:hover:not(:disabled) {
+    background: #8fc2ff;
+}
+
+.tool[aria-pressed="true"] {
+    background: #1553b8;
+    border-color: #9cc8ff;
+}
+
+.tool.sq {
+    width: 36px;
+    padding: 0;
+    font-size: 18px;
+}
+
+.zoom {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.zoom-label {
+    min-width: 46px;
+    text-align: center;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+
+.status {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: #a9cdff;
+}
+
+.status.err {
+    color: #ffb4b4;
+}
+
+.guide {
+    min-height: 44px;
+    margin-bottom: 10px;
+    padding: 10px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 14px;
+}
+
+.guide:empty {
+    display: none;
+}
+
+.guide .pick {
+    color: #d6e3ff;
+    word-break: break-word;
+}
+
+.guide .btn {
+    min-width: 0;
+}
+
+.stage-scroll {
+    max-height: 72vh;
+    min-height: 220px;
+    overflow: auto;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px;
+    background: #0a1226;
+}
+
+.stage-scroll:focus-visible {
+    outline: 2px solid #6fb0ff;
+}
+
+.empty-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    color: #7f93b8;
+    font-size: 15px;
+}
+
+.empty-stage[hidden],
+.stage[hidden] {
+    display: none;
+}
+
+/* The picture is as wide as the panel at 100%; zoom just makes it wider and the panel scrolls */
+.stage {
+    position: relative;
+    width: calc(var(--zoom, 1) * 100%);
+    line-height: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    cursor: text;
+}
+
+.stage.adding {
+    cursor: crosshair;
+}
+
+.stage img {
+    display: block;
+    width: 100%;
+    height: auto;
+    -webkit-user-drag: none;
+    pointer-events: none;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+}
+
+.wbox {
+    position: absolute;
+    border-radius: 2px;
+}
+
+.stage.show-boxes .wbox {
+    outline: 1px solid rgba(37, 99, 235, 0.75);
+    background: rgba(37, 99, 235, 0.1);
+}
+
+.stage:not(.adding) .wbox:hover {
+    background: rgba(37, 99, 235, 0.18);
+}
+
+.wbox.manual {
+    outline: 1px dashed rgba(180, 83, 9, 0.9);
+}
+
+/* text already used for a field gets that field's colour underneath */
+.wbox.used {
+    box-shadow: inset 0 -3px 0 var(--u);
+}
+
+.wbox.sel {
+    background: color-mix(in srgb, var(--sc, #5b8def) 38%, transparent);
+    outline: 2px solid var(--sc, #5b8def);
+    z-index: 2;
+}
+
+.marquee {
+    position: absolute;
+    border: 1.5px dashed #2563eb;
+    background: rgba(37, 99, 235, 0.14);
+    pointer-events: none;
+    z-index: 3;
+}
+
+.stage.adding .marquee {
+    border-color: #b45309;
+    background: rgba(180, 83, 9, 0.16);
+}
+
+.marquee[hidden] {
+    display: none;
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 1000px) {
+    .bill-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---------- Saved bills table ---------- */
+.panel.saved {
+    margin-top: 18px;
+}
+
+.saved-wrap {
+    max-height: 444px;
+}
+
+table.bills-table {
+    min-width: 1500px;
+}
+
+.bills-table th.num,
+.bills-table td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.bills-table td.merged {
+    vertical-align: middle;
+    background: #eee;
+}
+
+.bills-table td.first-line,
+.bills-table td.merged {
+    border-top: 2px solid #1f3d7a;
+}
+
+.bills-table td.total-cell {
+    font-weight: 700;
+}
+
+.bills-table .none {
+    color: #6a7a99;
+}
