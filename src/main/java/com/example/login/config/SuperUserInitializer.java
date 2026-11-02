@@ -32,5 +32,9 @@ public class SuperUserInitializer implements ApplicationRunner {
         if (userService.createIfMissing(name, password)) {
             log.info("Super user '{}' created", name);
         }
+        if ("family".equals(password)) {
+            log.warn("The super user password is still the default. Set the SUPER_USER_PASSWORD environment variable "
+                    + "(before the first start), or reset the password with the forgot-password link.");
+        }
     }
 }

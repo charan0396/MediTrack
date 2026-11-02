@@ -6,6 +6,7 @@ import com.example.login.model.MedicalRecord;
 import com.example.login.model.RecordAttachment;
 import com.example.login.service.RecordService;
 import com.example.login.util.FileTypes;
+import com.example.login.util.MedicalTypes;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -70,9 +71,10 @@ public class RecordController {
 
         MedicalRecord record = new MedicalRecord();
         record.setOwnerName(owner);
-        record.setName(patientName(name, owner, accessPolicy.isSuper(owner)));
+        record.setName(required(name, 100, "Name"));
         record.setRecordDate(parseDate(date));
-        record.setMedicalType(required(medicalType, 100, "Medical type"));
+        record.setMedicalType(MedicalTypes.find(required(medicalType, 100, "Medical type"))
+                .orElseThrow(() -> new InvalidInputException("Please choose the medical type from the list")));
         record.setHospitalName(optional(hospitalName, 150, "Hospital name"));
         record.setDrName(optional(drName, 100, "Dr name"));
         record.setAddress(optional(address, 255, "Address"));
@@ -158,21 +160,6 @@ public class RecordController {
             throw new InvalidInputException(label + " must be at most " + max + " characters");
         }
         return v;
-    }
-
-    /**
-     * The super user may enter a record for any name. Every other user can only enter records
-     * for their own user name.
-     */
-    private static String patientName(String submitted, String owner, boolean superUser) {
-        if (superUser) {
-            return required(submitted, 100, "Name");
-        }
-        String value = optional(submitted, 100, "Name");
-        if (value != null && !value.equalsIgnoreCase(owner)) {
-            throw new InvalidInputException("You can add records only for your own name (" + owner + ")");
-        }
-        return owner;
     }
 
     private static LocalDate parseDate(String date) {

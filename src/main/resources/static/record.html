@@ -26,7 +26,7 @@
         <div class="grid">
             <div class="f">
                 <label for="recName">Name <span class="req" title="Required">*</span></label>
-                <input type="text" id="recName" name="name" class="input" maxlength="100">
+                <input type="text" id="recName" name="name" class="input" maxlength="100" data-case="title">
             </div>
             <div class="f">
                 <label for="recDate">Date <span class="req" title="Required">*</span></label>
@@ -34,25 +34,47 @@
             </div>
             <div class="f">
                 <label for="recType">Medical Type <span class="req" title="Required">*</span></label>
-                <input type="text" id="recType" name="medicalType" class="input" maxlength="100">
+                <select id="recType" name="medicalType" class="input">
+                    <option value="">Select medical type</option>
+                    <option value="Pediatrician">Pediatrician</option>
+                    <option value="Neurologist">Neurologist</option>
+                    <option value="Dermatologist">Dermatologist</option>
+                    <option value="Anesthesiologist">Anesthesiologist</option>
+                    <option value="Psychiatrist">Psychiatrist</option>
+                    <option value="Gynecologist">Gynecologist</option>
+                    <option value="General Practitioner">General Practitioner</option>
+                    <option value="Dentist">Dentist</option>
+                    <option value="Family Doctor">Family Doctor</option>
+                    <option value="Surgeon">Surgeon</option>
+                    <option value="Pulmonologist">Pulmonologist</option>
+                    <option value="Veterinarian">Veterinarian</option>
+                    <option value="Cardiologist">Cardiologist</option>
+                    <option value="Epidemiologist">Epidemiologist</option>
+                    <option value="Rheumatologist">Rheumatologist</option>
+                    <option value="Urologist">Urologist</option>
+                    <option value="Optometrist">Optometrist</option>
+                    <option value="Radiologist">Radiologist</option>
+                    <option value="ENT Specialist">ENT Specialist</option>
+                    <option value="Plastic Surgeon">Plastic Surgeon</option>
+                </select>
             </div>
 
             <div class="f">
                 <label for="hospitalName">Hospital Name</label>
-                <input type="text" id="hospitalName" name="hospitalName" class="input" maxlength="150">
+                <input type="text" id="hospitalName" name="hospitalName" class="input" maxlength="150" data-case="title">
             </div>
             <div class="f">
                 <label for="drName">Dr Name</label>
-                <input type="text" id="drName" name="drName" class="input" maxlength="100">
+                <input type="text" id="drName" name="drName" class="input" maxlength="100" data-case="title">
             </div>
             <div class="f">
                 <label for="address">Address</label>
-                <input type="text" id="address" name="address" class="input" maxlength="255">
+                <input type="text" id="address" name="address" class="input" maxlength="255" data-case="title">
             </div>
 
             <div class="f">
                 <label for="diagnosticCenter">Diagnostic center</label>
-                <input type="text" id="diagnosticCenter" name="diagnosticCenter" class="input" maxlength="150">
+                <input type="text" id="diagnosticCenter" name="diagnosticCenter" class="input" maxlength="150" data-case="title">
             </div>
             <div class="f">
                 <label for="details">Details</label>
@@ -60,7 +82,7 @@
             </div>
             <div class="f">
                 <label for="diagAddress">Diag Address</label>
-                <input type="text" id="diagAddress" name="diagAddress" class="input" maxlength="255">
+                <input type="text" id="diagAddress" name="diagAddress" class="input" maxlength="255" data-case="title">
             </div>
         </div>
 
@@ -116,6 +138,7 @@
 </div>
 
 <script src="js/nav.js"></script>
+<script src="js/format.js"></script>
 <script src="js/record.js"></script>
 </body>
 </html>

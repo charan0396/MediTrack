@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediTrack - Home</title>
     <link rel="stylesheet" href="css/records.css">
+    <link rel="stylesheet" href="css/home.css">
 </head>
 <body>
 <main class="wrap wide">
@@ -13,16 +14,37 @@
         <span class="brand">MediTrack</span>
         <div class="line"></div>
         <span class="user" id="userName" title="Logged in user"></span>
-        <button type="button" id="homeBtn" class="nav-btn active" aria-current="page">home</button>
-        <button type="button" id="viewBtn" class="nav-btn">view</button>
-        <button type="button" id="billBtn" class="nav-btn">bill</button>
-        <button type="button" id="recordBtn" class="nav-btn">record</button>
         <button type="button" id="logoutBtn" class="nav-btn">logout</button>
     </header>
 
-    <!-- Home page is intentionally empty for now -->
+    <h1 class="hello" id="hello"></h1>
+    <p class="hello-sub" id="helloSub"></p>
+
+    <section class="actions" aria-label="Quick actions">
+        <a class="action" href="record.html"><b>+ Add record</b><span>Save a visit, prescription or scan</span></a>
+        <a class="action" href="bill.html"><b>+ Add bill</b><span>Capture a medical bill from its photo</span></a>
+        <a class="action" href="view.html"><b>View records</b><span>Search and download your records</span></a>
+    </section>
+
+    <section class="tiles" aria-label="Summary">
+        <div class="tile"><span id="tRecords">-</span><small>Records</small></div>
+        <div class="tile"><span id="tRecordsMonth">-</span><small>Records this month</small></div>
+        <div class="tile"><span id="tBills">-</span><small>Bills</small></div>
+        <div class="tile"><span id="tBillsMonth">-</span><small>Bills this month</small></div>
+        <div class="tile"><span id="tSpendMonth">-</span><small>Spent this month</small></div>
+        <div class="tile"><span id="tSpendAll">-</span><small>Spent in total</small></div>
+    </section>
+    <p class="home-msg" id="homeMsg"></p>
+
+    <section class="cols">
+        <div class="card"><h2>Recent records</h2><ul class="recent" id="recentRecords"></ul></div>
+        <div class="card"><h2>Recent bills</h2><ul class="recent" id="recentBills"></ul></div>
+        <div class="card"><h2>Records by medical type</h2><div class="bars" id="typeBars"></div></div>
+        <div class="card"><h2>Spend, last 6 months</h2><div class="bars" id="spendBars"></div></div>
+    </section>
 </main>
 
 <script src="js/nav.js"></script>
+<script src="js/home.js"></script>
 </body>
 </html>

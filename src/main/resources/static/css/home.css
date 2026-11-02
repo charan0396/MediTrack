@@ -1,0 +1,25 @@
+.hello { margin: 26px 0 4px; font-size: 30px; }
+.hello-sub { margin: 0 0 22px; color: #b9cdf0; }
+.actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.action { display: block; padding: 18px; border-radius: 14px; text-decoration: none; color: #fff;
+    background: linear-gradient(135deg, #1553b8, #0b3a8a); border: 1px solid rgba(255,255,255,.35);
+    transition: transform .15s, box-shadow .15s; }
+.action:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(0,0,0,.35); }
+.action b { display: block; font-size: 18px; margin-bottom: 4px; }
+.action span { font-size: 14px; color: #cfe0ff; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 18px; }
+.tile { padding: 14px; border-radius: 12px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); }
+.tile span { display: block; font-size: 26px; font-weight: 700; }
+.tile small { color: #b9cdf0; font-size: 13px; }
+.home-msg { color: #ffd2d2; min-height: 18px; }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; margin-bottom: 30px; }
+.card { padding: 16px; border-radius: 14px; background: rgba(4, 18, 46, .6); border: 1px solid rgba(255,255,255,.2); }
+.card h2 { margin: 0 0 12px; font-size: 17px; }
+.recent { list-style: none; margin: 0; padding: 0; }
+.recent li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.12); font-size: 14px; }
+.recent li:last-child { border-bottom: 0; }
+.recent small { color: #b9cdf0; white-space: nowrap; }
+.empty { color: #b9cdf0; font-size: 14px; }
+.bar-row { display: grid; grid-template-columns: 130px 1fr auto; align-items: center; gap: 8px; margin: 6px 0; font-size: 13px; }
+.bar-track { height: 12px; border-radius: 6px; background: rgba(255,255,255,.12); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #2fd4c4, #5b8dff); }

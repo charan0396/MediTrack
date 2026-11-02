@@ -14,12 +14,10 @@
     var confirmYes = document.getElementById('confirmYes');
     var confirmNo = document.getElementById('confirmNo');
 
-    // Only the super user can enter records for other names. Everyone else: own user name, locked.
+    // The name can be changed (a record may be for someone else). It starts as the logged-in user's own name.
     if (!window.isSuperUser) {
         nameInput.defaultValue = window.loggedInUser;
         nameInput.value = window.loggedInUser;
-        nameInput.readOnly = true;
-        nameInput.title = 'You can add records only for your own name';
     }
 
     function setMsg(text, ok) {

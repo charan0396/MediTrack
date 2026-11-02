@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,9 @@ import java.util.List;
 @Entity
 @Table(name = "bills")
 public class Bill {
+
+    /** Set only after the invoice is edited. A new invoice has no status. */
+    public static final String STATUS_EDITED = "Edited";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,8 +55,43 @@ public class Bill {
     private String invoiceNumber;
 
     /** Sum of quantity x price of every product. Always calculated by the server. */
+    @Column(name = "sub_total", precision = 16, scale = 2)
+    private BigDecimal subTotal;
+
+    /** AMOUNT (rupees) or PERCENT: how the discount value below was typed. */
+    @Column(name = "discount_type", length = 10)
+    private String discountType;
+
+    /** The discount exactly as typed (rupees or percent, see discount_type). */
+    @Column(name = "discount_value", precision = 16, scale = 2)
+    private BigDecimal discountValue;
+
+    /** The discount in rupees. It is deducted from the sub total. */
+    @Column(name = "discount_amount", precision = 16, scale = 2)
+    private BigDecimal discountAmount;
+
+    /** GST rate in percent. GST is calculated on (sub total - discount). */
+    @Column(name = "gst_percent", precision = 5, scale = 2)
+    private BigDecimal gstPercent;
+
+    @Column(name = "gst_amount", precision = 16, scale = 2)
+    private BigDecimal gstAmount;
+
+    /** (sub total - discount) + GST. Always calculated by the server. */
     @Column(name = "total_amount", nullable = false, precision = 16, scale = 2)
     private BigDecimal totalAmount;
+
+    /** Empty until the invoice is edited ("Edited"). Deleted invoices move to deleted_bills. */
+    @Column(name = "status", length = 20)
+    private String status;
+
+    /** When the invoice was last edited. Empty until the first edit. */
+    @Column(name = "update_date")
+    private LocalDateTime updateDate;
+
+    /** Login name of the user who last edited the invoice. Empty until the first edit. */
+    @Column(name = "update_by", length = 50)
+    private String updateBy;
 
     /** The captured (uploaded) bill image. Optional. */
     @Column(name = "bill_file_name", length = 255)
@@ -101,8 +140,35 @@ public class Bill {
     public String getInvoiceNumber() { return invoiceNumber; }
     public void setInvoiceNumber(String invoiceNumber) { this.invoiceNumber = invoiceNumber; }
 
+    public BigDecimal getSubTotal() { return subTotal; }
+    public void setSubTotal(BigDecimal subTotal) { this.subTotal = subTotal; }
+
+    public String getDiscountType() { return discountType; }
+    public void setDiscountType(String discountType) { this.discountType = discountType; }
+
+    public BigDecimal getDiscountValue() { return discountValue; }
+    public void setDiscountValue(BigDecimal discountValue) { this.discountValue = discountValue; }
+
+    public BigDecimal getDiscountAmount() { return discountAmount; }
+    public void setDiscountAmount(BigDecimal discountAmount) { this.discountAmount = discountAmount; }
+
+    public BigDecimal getGstPercent() { return gstPercent; }
+    public void setGstPercent(BigDecimal gstPercent) { this.gstPercent = gstPercent; }
+
+    public BigDecimal getGstAmount() { return gstAmount; }
+    public void setGstAmount(BigDecimal gstAmount) { this.gstAmount = gstAmount; }
+
     public BigDecimal getTotalAmount() { return totalAmount; }
     public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public LocalDateTime getUpdateDate() { return updateDate; }
+    public void setUpdateDate(LocalDateTime updateDate) { this.updateDate = updateDate; }
+
+    public String getUpdateBy() { return updateBy; }
+    public void setUpdateBy(String updateBy) { this.updateBy = updateBy; }
 
     public String getBillFileName() { return billFileName; }
     public void setBillFileName(String billFileName) { this.billFileName = billFileName; }

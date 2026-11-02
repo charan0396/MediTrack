@@ -463,7 +463,7 @@ input[type="number"].input::-webkit-inner-spin-button {
 }
 
 table.bills-table {
-    min-width: 1500px;
+    min-width: 2600px;
 }
 
 .bills-table th.num,
@@ -488,4 +488,192 @@ table.bills-table {
 
 .bills-table .none {
     color: #6a7a99;
+}
+
+/* ---------- Sub total / discount / GST / total ---------- */
+.calc-box {
+    margin: 16px 0 12px;
+    padding: 12px 12px 4px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.calc-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.calc-row small,
+.total-label small {
+    display: block;
+    font-weight: 400;
+    font-size: 12px;
+    color: #a9cdff;
+}
+
+.calc-val {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.disc-row {
+    display: grid;
+    grid-template-columns: 1fr 64px minmax(110px, auto);
+    align-items: center;
+    gap: 8px;
+}
+
+.disc-row .unit {
+    padding: 0 4px;
+    text-align: center;
+}
+
+.unit-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 15px;
+}
+
+.disc-row .calc-val {
+    text-align: right;
+    font-size: 14px;
+}
+
+.calc-note {
+    margin: -4px 0 10px;
+    font-size: 12px;
+    color: #a9cdff;
+}
+
+.calc-box .total-box {
+    margin: 4px -12px 0;
+    border-radius: 0 0 10px 10px;
+    border-width: 1px 0 0;
+}
+
+/* ---------- Edit mode banner ---------- */
+.edit-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border: 1px solid #f6c453;
+    border-radius: 8px;
+    background: rgba(246, 196, 83, 0.14);
+    font-size: 14px;
+}
+
+.edit-banner[hidden] {
+    display: none;
+}
+
+/* ---------- Saved bills: filters, status, actions ---------- */
+.filter input[type="date"] {
+    height: 34px;
+    padding: 0 8px;
+    border: none;
+    border-radius: 6px;
+    background: #dfe9f8;
+    color: #0a1a3a;
+    font-family: inherit;
+    font-size: 14px;
+    color-scheme: light;
+}
+
+.filter input[type="date"]:focus {
+    outline: 2px solid #6fb0ff;
+}
+
+.panel.saved .note {
+    margin-bottom: 10px;
+}
+
+.btn.danger {
+    background: #9b1c2e;
+}
+
+.btn.danger:hover {
+    background: #b82339;
+}
+
+.row-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.mini {
+    height: 28px;
+    padding: 0 12px;
+    border: 1px solid #1f3d7a;
+    border-radius: 6px;
+    background: #fff;
+    color: #0b3a8a;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.mini:hover {
+    background: #dfe9f8;
+}
+
+.mini.del {
+    border-color: #9b1c2e;
+    color: #9b1c2e;
+}
+
+.mini.del:hover {
+    background: #fbe3e6;
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 10px;
+    background: #fff1cc;
+    color: #7a5200;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* ---------- Printed total check ---------- */
+.printed-note {
+    margin: 2px 0 0;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.printed-note:empty {
+    display: none;
+}
+
+.printed-note.ok {
+    color: #a8f0b8;
+}
+
+.printed-note.warn {
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: rgba(246, 196, 83, 0.16);
+    color: #ffd98a;
+}
+
+.toolbar-buttons {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
 }

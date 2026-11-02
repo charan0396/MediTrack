@@ -12,6 +12,18 @@
     var productsBox = document.getElementById('products');
     var addProductBtn = document.getElementById('addProductBtn');
     var totalOut = document.getElementById('totalAmount');
+    var subTotalOut = document.getElementById('subTotalOut');
+    var discountOut = document.getElementById('discountOut');
+    var afterOut = document.getElementById('afterOut');
+    var gstOut = document.getElementById('gstOut');
+    var discountInput = document.getElementById('fDiscount');
+    var discountType = document.getElementById('fDiscountType');
+    var gstInput = document.getElementById('fGst');
+    var printedInput = document.getElementById('fPrinted');
+    var printedNote = document.getElementById('printedNote');
+    var editBanner = document.getElementById('editBanner');
+    var editText = document.getElementById('editText');
+    var cancelEditBtn = document.getElementById('cancelEditBtn');
     var autoNext = document.getElementById('autoNext');
     var saveBtn = document.getElementById('saveBtn');
     var clearBtn = document.getElementById('clearBtn');
@@ -61,13 +73,15 @@
     var workerPromise = null;
     var drag = null;
     var rowSeq = 0;
+    var editingId = null;    // id of the invoice being edited, or null when adding a new one
+    var printedMismatch = '';   // text of the printed-total warning while the totals disagree, else ''
+    var imageChanged = false; // true when a new bill picture was chosen (an edited invoice keeps its old one otherwise)
 
-    // Only the super user can save bills for other names. Everyone else: own user name, locked.
-    if (!window.isSuperUser) {
-        nameInput.value = window.loggedInUser;
-        nameInput.readOnly = true;
-        nameInput.title = 'You can add bills only for your own name';
+    // The name can be changed (a bill may be for someone else). It starts as the logged-in user's own name.
+    function defaultName() {
+        return window.isSuperUser ? '' : window.loggedInUser;
     }
+    nameInput.value = defaultName();
 
     // =====================================================================
     // Small helpers
@@ -134,14 +148,58 @@
         return (q * p + 50n) / 100n; // quantity x price, rounded half up to a paisa
     }
 
-    function recalc() {
-        var total = 0n;
+    // Percent values are read in hundredths of a percent (12.5% -> 1250), so the maths stays exact
+    function amounts() {
+        var sub = 0n;
         Array.prototype.forEach.call(productsBox.children, function (row) {
             var cents = lineCents(row);
-            row.querySelector('.line-total').textContent = cents === null ? '—' : formatCents(cents);
-            if (cents !== null) total += cents;
+            row.querySelector('.line-total').textContent = cents === null ? '\u2014' : formatCents(cents);
+            if (cents !== null) sub += cents;
         });
-        totalOut.textContent = formatCents(total);
+
+        var typed = toCents(discountInput.value) || 0n;
+        var discount = discountType.value === 'PERCENT' ? (sub * typed + 5000n) / 10000n : typed;
+        var after = discount > sub ? 0n : sub - discount;          // an impossible discount is flagged on save
+
+        var gstRate = toCents(gstInput.value) || 0n;
+        var gst = (after * gstRate + 5000n) / 10000n;              // GST on the amount after discount
+        return { sub: sub, discount: discount, after: after, gst: gst, total: after + gst };
+    }
+
+    function recalc() {
+        var a = amounts();
+        subTotalOut.textContent = formatCents(a.sub);
+        discountOut.textContent = '\u2212 ' + formatCents(a.discount);
+        afterOut.textContent = formatCents(a.after);
+        gstOut.textContent = '+ ' + formatCents(a.gst);
+        totalOut.textContent = formatCents(a.total);
+        checkPrinted(a.total);
+    }
+
+    // Compares the total printed on the bill with the calculated total. Only a warning, saving is still possible.
+    // Bills are often rounded to the nearest rupee, so a difference below one rupee is accepted.
+    function checkPrinted(total) {
+        var printed = toCents(printedInput.value);
+        printedMismatch = '';
+        printedNote.className = 'printed-note';
+        if (printed === null) {
+            printedNote.textContent = '';
+            return;
+        }
+        var diff = total > printed ? total - printed : printed - total;
+        if (diff === 0n) {
+            printedNote.textContent = '\u2713 Matches the total printed on the bill.';
+            printedNote.classList.add('ok');
+        } else if (diff < 100n) {
+            printedNote.textContent = '\u2713 Within \u20B91 of the printed total (calculated ' + formatCents(total) +
+                ', printed ' + formatCents(printed) + '): normal rounding.';
+            printedNote.classList.add('ok');
+        } else {
+            printedMismatch = 'The total printed on the bill (' + formatCents(printed) + ') is different from the calculated total.';
+            printedNote.textContent = '\u26A0 Does not match: calculated ' + formatCents(total) + ', printed ' + formatCents(printed) +
+                ' (difference ' + formatCents(diff) + '). Check the quantities, prices, discount and GST.';
+            printedNote.classList.add('warn');
+        }
     }
 
     // =====================================================================
@@ -203,7 +261,7 @@
             '<button type="button" class="rm" title="Remove this product">&times;</button></div>' +
             '<div class="fld" style="--c:#f472b6">' +
             '<div class="fld-top"><label for="p' + n + 'n"><i class="dot"></i>Product</label><span class="here">Filling here</span></div>' +
-            '<input type="text" id="p' + n + 'n" class="input" data-kind="text" data-role="product" maxlength="200" placeholder="e.g. medicine or item name">' +
+            '<input type="text" id="p' + n + 'n" class="input" data-kind="text" data-case="title" data-role="product" maxlength="200" placeholder="e.g. medicine or item name">' +
             '</div>' +
             '<div class="trio">' +
             '<div class="fld" style="--c:#fbbf24">' +
@@ -256,7 +314,7 @@
     });
 
     form.addEventListener('input', function (e) {
-        if (e.target.closest('.prod')) recalc();
+        recalc();
         e.target.classList.remove('bad');
     });
 
@@ -466,6 +524,7 @@
         }
         var el = active;
         var value = convert(el.dataset.kind, text);
+        if (value !== null && el.dataset.case === 'title') value = window.toTitleCase(value); // SRI SAI -> Sri Sai
         if (value === null) {
             var what = el.dataset.kind === 'date' ? 'a date' : el.dataset.kind === 'number' ? 'a number' : 'text';
             setStatus('Could not read ' + what + ' from “' + cleanText(text) + '”. Pick a different part of the bill, or type it in.', true);
@@ -677,13 +736,15 @@
             setStatus('"' + file.name + '" is larger than 10 MB.', true);
             return;
         }
-        loadBill(file);
+        loadBill(file, false);
     });
 
-    function loadBill(file) {
+    // fromServer: the picture already saved with an invoice being edited (not a new upload)
+    function loadBill(file, fromServer) {
         if (objectUrl) URL.revokeObjectURL(objectUrl);
         objectUrl = URL.createObjectURL(file);
         billFile = file;
+        imageChanged = !fromServer;
         ocrRun++;
         clearWords();
         setAddMode(false);
@@ -802,9 +863,14 @@
     // =====================================================================
     function resetFields() {
         [nameInput, dateInput, shopInput, invoiceInput].forEach(function (el) {
-            if (!el.readOnly) el.value = '';
+            el.value = el === nameInput ? defaultName() : '';
             el.classList.remove('bad');
         });
+        discountInput.value = '';
+        discountType.value = 'AMOUNT';
+        gstInput.value = '';
+        printedInput.value = '';
+        [discountInput, gstInput].forEach(function (el) { el.classList.remove('bad'); });
         words.forEach(function (w) { w.used = null; paintWord(w); });
         productsBox.textContent = '';
         addProductRow();
@@ -821,6 +887,7 @@
         if (objectUrl) URL.revokeObjectURL(objectUrl);
         objectUrl = null;
         billFile = null;
+        imageChanged = false;
         billImg.removeAttribute('src');
         stage.hidden = true;
         emptyStage.hidden = false;
@@ -832,6 +899,76 @@
     }
 
     clearBtn.addEventListener('click', resetFields);
+
+    // =====================================================================
+    // Editing a saved invoice (started from the Saved bills table)
+    // =====================================================================
+    function leaveEditMode() {
+        editingId = null;
+        editBanner.hidden = true;
+        saveBtn.textContent = 'Save invoice';
+        resetFields();
+        removeBillImage();
+    }
+
+    cancelEditBtn.addEventListener('click', leaveEditMode);
+
+    function numberText(value) {
+        return value === null || value === undefined || Number(value) === 0 ? '' : String(value);
+    }
+
+    // inv = { head: first row of the invoice, lines: one row per product }
+    async function startEdit(inv) {
+        var h = inv.head;
+        resetFields();
+        removeBillImage();
+        editingId = h.billId;
+
+        nameInput.value = h.name || '';
+        dateInput.value = h.billDate || '';
+        shopInput.value = h.medicalShop || '';
+        invoiceInput.value = h.invoiceNumber || '';
+        discountType.value = h.discountType === 'PERCENT' ? 'PERCENT' : 'AMOUNT';
+        discountInput.value = numberText(h.discountValue);
+        gstInput.value = numberText(h.gstPercent);
+
+        productsBox.textContent = '';
+        inv.lines.forEach(function (line) {
+            var row = addProductRow();
+            row.querySelector('[data-role="product"]').value = line.product || '';
+            row.querySelector('[data-role="quantity"]').value = numberText(line.quantity);
+            row.querySelector('[data-role="price"]').value = String(line.price);
+        });
+        recalc();
+
+        editText.textContent = 'Editing the invoice of \u201C' + (h.name || '') + '\u201D' +
+            (h.invoiceNumber ? ' (' + h.invoiceNumber + ')' : '') + '. Change what you need, then press Update invoice.';
+        editBanner.hidden = false;
+        saveBtn.textContent = 'Update invoice';
+        var first = targets()[0];
+        if (first) setActive(first);
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        if (h.billFileName) {                         // show the saved picture again (and read its text again)
+            setStatus('Loading the saved bill image\u2026');
+            try {
+                var res = await fetch('/api/bills/' + encodeURIComponent(h.billId) + '/image', { cache: 'no-store' });
+                if (res.status === 401) { window.handleUnauthorized(); return; }
+                if (!res.ok) throw new Error('bad status');
+                var blob = await res.blob();
+                if (editingId !== h.billId) return;   // another invoice was opened meanwhile
+                loadBill(new File([blob], h.billFileName, { type: blob.type }), true);
+            } catch (err) {
+                setStatus('The saved bill image could not be loaded. You can still change the other details.', true);
+            }
+        }
+    }
+
+    window.BillForm = {
+        startEdit: startEdit,
+        cancelEdit: leaveEditMode,
+        editingId: function () { return editingId; }
+    };
 
     function fail(el, text) {
         el.classList.add('bad');
@@ -865,15 +1002,33 @@
             filled.push(row);
         }
         if (!filled.length) return fail(productsBox.querySelector('[data-role="product"]'), 'Add at least one product');
+
+        var sub = 0n;
+        filled.forEach(function (row) { sub += lineCents(row); });
+        if (discountInput.value.trim()) {
+            var d = toCents(discountInput.value);
+            if (d === null) return fail(discountInput, 'Discount must be a number');
+            if (discountType.value === 'PERCENT' ? d > 10000n : d > sub) {
+                return fail(discountInput, discountType.value === 'PERCENT'
+                    ? 'Discount cannot be more than 100%' : 'Discount cannot be more than the sub total');
+            }
+        }
+        if (gstInput.value.trim()) {
+            var g = toCents(gstInput.value);
+            if (g === null) return fail(gstInput, 'GST must be a number');
+            if (g > 10000n) return fail(gstInput, 'GST cannot be more than 100%');
+        }
         return filled;
     }
 
     function openConfirm(filled) {
-        var total = 0n;
-        filled.forEach(function (row) { total += lineCents(row); });
-        confirmText.textContent = 'Save this invoice for "' + nameInput.value.trim() + '" with ' + filled.length +
+        var total = amounts().total;
+        var verb = editingId ? 'Update' : 'Save';
+        document.getElementById('confirmTitle').textContent = 'Confirm ' + verb.toLowerCase();
+        confirmYes.textContent = 'Yes, ' + verb.toLowerCase();
+        confirmText.textContent = verb + ' this invoice for "' + nameInput.value.trim() + '" with ' + filled.length +
             (filled.length === 1 ? ' product' : ' products') + ', total ' + formatCents(total) +
-            (billFile ? '?' : ' (no bill image attached)?');
+            (billFile ? '?' : ' (no bill image attached)?') + (printedMismatch ? ' ' + printedMismatch : '');
         confirmModal.classList.add('open');
         confirmModal.setAttribute('aria-hidden', 'false');
         confirmYes.focus();
@@ -905,17 +1060,21 @@
         data.append('billDate', dateInput.value);
         data.append('medicalShop', shopInput.value.trim());
         data.append('invoiceNumber', invoiceInput.value.trim());
+        data.append('discountType', discountType.value);
+        data.append('discountValue', discountInput.value.trim());
+        data.append('gstPercent', gstInput.value.trim());
         filled.forEach(function (row) {            // one product / quantity / price entry per product row
             data.append('product', row.querySelector('[data-role="product"]').value.trim());
             data.append('quantity', row.querySelector('[data-role="quantity"]').value);
             data.append('price', row.querySelector('[data-role="price"]').value);
         });
-        if (billFile) data.append('image', billFile, billFile.name);
+        if (billFile && (!editingId || imageChanged)) data.append('image', billFile, billFile.name);
+        var url = editingId ? '/api/bills/' + encodeURIComponent(editingId) + '/update' : '/api/bills';
 
         confirmYes.disabled = true;
         saveBtn.disabled = true;
         try {
-            var res = await fetch('/api/bills', { method: 'POST', body: data });
+            var res = await fetch(url, { method: 'POST', body: data });
             if (res.status === 401) {
                 window.handleUnauthorized();
                 return;
@@ -925,12 +1084,16 @@
 
             closeConfirm();
             if (res.ok && body.success) {
-                resetFields();
-                removeBillImage();
-                window.showToast('Invoice saved successfully');
+                var wasEdit = !!editingId;
+                leaveEditMode();
+                window.showToast(wasEdit ? 'Invoice updated successfully' : 'Invoice saved successfully');
                 window.dispatchEvent(new Event('bill-saved')); // refreshes the Saved bills table
             } else {
-                setMsg(body.message || 'Could not save the invoice');
+                setMsg(body.message || (editingId ? 'Could not update the invoice' : 'Could not save the invoice'));
+                if (res.status === 404) {                      // the invoice was deleted meanwhile
+                    leaveEditMode();
+                    window.dispatchEvent(new Event('bill-saved'));
+                }
             }
         } catch (err) {
             closeConfirm();

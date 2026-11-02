@@ -32,10 +32,15 @@
             <p class="hint">Click a field to choose where text goes. Then double-click a word on the bill to fill in
                 its whole value (like a full name), or drag across text to pick exactly what you want.</p>
 
+            <div id="editBanner" class="edit-banner" hidden>
+                <span id="editText"></span>
+                <button type="button" id="cancelEditBtn" class="btn small secondary">Cancel edit</button>
+            </div>
+
             <form id="billForm" autocomplete="off" novalidate>
                 <div class="fld" style="--c:#5b8def">
                     <div class="fld-top"><label for="fName"><i class="dot"></i>Name <span class="req" title="Required">*</span></label><span class="here">Filling here</span></div>
-                    <input type="text" id="fName" class="input" data-kind="text" maxlength="100" placeholder="e.g. patient name">
+                    <input type="text" id="fName" class="input" data-kind="text" data-case="title" maxlength="100" placeholder="e.g. patient name">
                 </div>
 
                 <div class="fld" style="--c:#b383f0">
@@ -45,7 +50,7 @@
 
                 <div class="fld" style="--c:#2dd4bf">
                     <div class="fld-top"><label for="fShop"><i class="dot"></i>Medical shop</label><span class="here">Filling here</span></div>
-                    <input type="text" id="fShop" class="input" data-kind="text" maxlength="150" placeholder="e.g. shop name">
+                    <input type="text" id="fShop" class="input" data-kind="text" data-case="title" maxlength="150" placeholder="e.g. shop name">
                 </div>
 
                 <div class="fld" style="--c:#fb923c">
@@ -57,9 +62,43 @@
                 <div id="products" class="products"></div>
                 <button type="button" id="addProductBtn" class="btn secondary add-product">+ Add product</button>
 
-                <div class="total-box">
-                    <span class="total-label">Total amount<small>sum of quantity &times; price</small></span>
-                    <output id="totalAmount" class="total-value" for="products">&#8377; 0.00</output>
+                <div class="calc-box">
+                    <div class="calc-row"><span>Sub total<small>sum of quantity &times; price</small></span><output id="subTotalOut" class="calc-val">&#8377; 0.00</output></div>
+
+                    <div class="fld" style="--c:#f87171">
+                        <div class="fld-top"><label for="fDiscount"><i class="dot"></i>Discount</label><span class="here">Filling here</span></div>
+                        <div class="disc-row">
+                            <input type="number" id="fDiscount" class="input" data-kind="number" min="0" step="any" inputmode="decimal" placeholder="0">
+                            <select id="fDiscountType" class="input unit" aria-label="Discount is an amount in rupees or a percent">
+                                <option value="AMOUNT">&#8377;</option>
+                                <option value="PERCENT">%</option>
+                            </select>
+                            <output id="discountOut" class="calc-val">&minus; &#8377; 0.00</output>
+                        </div>
+                    </div>
+
+                    <div class="calc-row"><span>Amount after discount<small>sub total &minus; discount</small></span><output id="afterOut" class="calc-val">&#8377; 0.00</output></div>
+
+                    <div class="fld" style="--c:#a3e635">
+                        <div class="fld-top"><label for="fGst"><i class="dot"></i>GST %</label><span class="here">Filling here</span></div>
+                        <div class="disc-row">
+                            <input type="number" id="fGst" class="input" data-kind="number" min="0" step="any" inputmode="decimal" placeholder="0">
+                            <span class="unit-label">%</span>
+                            <output id="gstOut" class="calc-val">+ &#8377; 0.00</output>
+                        </div>
+                    </div>
+                    <p class="calc-note">GST is calculated on the amount after discount.</p>
+
+                    <div class="total-box">
+                        <span class="total-label">Total amount<small>amount after discount + GST</small></span>
+                        <output id="totalAmount" class="total-value">&#8377; 0.00</output>
+                    </div>
+                </div>
+
+                <div class="fld" style="--c:#38bdf8">
+                    <div class="fld-top"><label for="fPrinted"><i class="dot"></i>Total printed on the bill</label><span class="here">Filling here</span></div>
+                    <input type="number" id="fPrinted" class="input" data-kind="number" min="0" step="any" inputmode="decimal" placeholder="optional, to double-check the total above">
+                    <p id="printedNote" class="printed-note" role="status"></p>
                 </div>
 
                 <label class="check"><input type="checkbox" id="autoNext" checked> Move to the next field after filling</label>
@@ -107,8 +146,17 @@
     <!-- ================= Saved bills ================= -->
     <section class="panel saved" aria-labelledby="savedTitle">
         <h2 id="savedTitle">Saved bills</h2>
-        <p id="savedNote" class="note" hidden></p>
+        <p id="savedNote" class="note"></p>
         <p id="savedMsg" class="msg" role="alert"></p>
+
+        <!-- Filter dropdowns and date range -->
+        <div class="toolbar">
+            <div id="savedFilters" class="filters" role="group" aria-label="Filters"></div>
+            <div class="toolbar-buttons">
+                <button type="button" id="clearFilters" class="nav-btn">clear filters</button>
+                <button type="button" id="downloadBills" class="nav-btn">download</button>
+            </div>
+        </div>
         <div class="table-wrap saved-wrap" tabindex="0" aria-label="Saved bills">
             <table class="data bills-table">
                 <thead>
@@ -123,8 +171,16 @@
                     <th class="num">Quantity</th>
                     <th class="num">Price</th>
                     <th class="num">Line Total</th>
+                    <th class="num">Sub Total</th>
+                    <th class="num">Discount</th>
+                    <th class="num">GST %</th>
+                    <th class="num">GST Amount</th>
                     <th class="num">Total Amount</th>
+                    <th>Status</th>
+                    <th>Update Date</th>
+                    <th>Update By</th>
                     <th>Captured Bill</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody id="billRows"></tbody>
@@ -132,6 +188,18 @@
         </div>
     </section>
 </main>
+
+<!-- Delete confirmation popup -->
+<div id="deleteModal" class="modal" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+        <h2 id="deleteTitle">Delete invoice</h2>
+        <p id="deleteText"></p>
+        <div class="modal-actions">
+            <button type="button" id="deleteNo" class="btn secondary">Cancel</button>
+            <button type="button" id="deleteYes" class="btn danger">Yes, delete</button>
+        </div>
+    </div>
+</div>
 
 <!-- Captured bill preview popup -->
 <div id="previewModal" class="modal" aria-hidden="true">
@@ -173,6 +241,7 @@
 </div>
 
 <script src="js/nav.js"></script>
+<script src="js/format.js"></script>
 <script src="js/bill.js"></script>
 <script src="js/bill-list.js"></script>
 </body>

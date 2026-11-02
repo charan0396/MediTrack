@@ -11,7 +11,17 @@ body {
     font-family: "Public Sans", "Segoe UI", Arial, sans-serif;
     font-size: 16px;
     color: #fff;
-    background: #000a1f url("../images/bg.jpg") center / cover no-repeat fixed;
+    /* Page background (record, view, bill, home): soft glows over a deep blue gradient with a faint medical-cross pattern.
+       To go back to the old photo use:  background: #000a1f url("../images/bg.jpg") center / cover no-repeat fixed;  */
+    background-color: #06173d;
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='%23ffffff' fill-opacity='0.045'%3E%3Crect x='56' y='46' width='8' height='28' rx='2'/%3E%3Crect x='46' y='56' width='28' height='8' rx='2'/%3E%3C/g%3E%3C/svg%3E"),
+        radial-gradient(circle at 12% 10%, rgba(0, 200, 190, 0.35), transparent 42%),
+        radial-gradient(circle at 90% 18%, rgba(70, 130, 255, 0.40), transparent 45%),
+        radial-gradient(circle at 70% 95%, rgba(140, 90, 255, 0.28), transparent 45%),
+        linear-gradient(160deg, #04122e 0%, #0a2a66 55%, #0c3b7a 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
 }
 
 .wrap {
