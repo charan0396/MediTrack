@@ -25,6 +25,15 @@
 
     <!-- Filter dropdowns (left) and the download button (right, directly under logout) -->
     <div class="toolbar">
+        <div class="filters" role="group" aria-label="View type">
+            <label class="filter">
+                <span>View Type</span>
+                <select id="viewType" aria-label="View Type">
+                    <option value="records">Medical Records</option>
+                    <option value="medicines">Medicines</option>
+                </select>
+            </label>
+        </div>
         <div id="filters" class="filters" role="group" aria-label="Filters"></div>
         <button type="button" id="downloadBtn" class="nav-btn">download</button>
     </div>

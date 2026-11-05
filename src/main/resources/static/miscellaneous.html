@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediTrack - Miscellaneous</title>
+    <link rel="stylesheet" href="css/records.css">
+</head>
+<body>
+<main class="wrap wide">
+
+    <header class="topbar">
+        <span class="brand">MediTrack</span>
+        <div class="line"></div>
+        <span class="user" id="userName" title="Logged in user"></span>
+        <button type="button" id="homeBtn" class="nav-btn">home</button>
+        <button type="button" id="viewBtn" class="nav-btn">view</button>
+        <button type="button" id="billBtn" class="nav-btn">bill</button>
+        <button type="button" id="recordBtn" class="nav-btn">record</button>
+        <button type="button" id="logoutBtn" class="nav-btn">logout</button>
+    </header>
+
+    <h1 class="page-title">Miscellaneous</h1>
+
+    <div class="form-wrap">
+    <form id="miscForm" autocomplete="off" novalidate>
+        <div class="grid">
+            <div class="f">
+                <label for="miscDate">Date <span class="req" title="Required">*</span></label>
+                <input type="date" id="miscDate" name="date" class="input">
+            </div>
+            <div class="f">
+                <label for="miscName">Name <span class="req" title="Required">*</span></label>
+                <input type="text" id="miscName" name="name" class="input" maxlength="100" data-case="title">
+            </div>
+            <div class="f">
+                <label for="miscAmount">Amount <span class="req" title="Required">*</span></label>
+                <input type="text" id="miscAmount" name="amount" class="input" inputmode="decimal" maxlength="20" placeholder="0.00">
+            </div>
+            <div class="f" style="grid-column: 1 / -1">
+                <label for="miscDesc">Description</label>
+                <input type="text" id="miscDesc" name="description" class="input" maxlength="500">
+            </div>
+        </div>
+        <div class="actions">
+            <button type="submit" id="miscSubmit" class="btn">Submit</button>
+            <p id="miscMsg" class="msg" role="alert"></p>
+        </div>
+    </form>
+    </div>
+
+    <h2 class="sub-title">Saved entries <span id="miscTotal" class="note-inline"></span></h2>
+    <div class="table-wrap" tabindex="0" aria-label="Saved miscellaneous entries">
+        <table class="data">
+            <thead><tr id="miscHead"></tr></thead>
+            <tbody id="miscBody"></tbody>
+        </table>
+    </div>
+</main>
+
+<script src="js/nav.js"></script>
+<script src="js/format.js"></script>
+<script src="js/misc.js"></script>
+</body>
+</html>

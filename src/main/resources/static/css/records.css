@@ -539,3 +539,12 @@ table.data {
 .toolbar > .nav-btn {
     margin-left: auto;
 }
+
+.filters[hidden] {
+    display: none;
+}
+
+/* ---------- Miscellaneous page ---------- */
+.page-title { margin: 22px 0 14px; font-size: 26px; }
+.sub-title { margin: 26px 0 10px; font-size: 19px; }
+.note-inline { font-size: 14px; font-weight: 400; color: #b9cdf0; }

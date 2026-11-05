@@ -18,13 +18,35 @@
         { label: 'Others', key: 'others', files: true }
     ];
 
+    // Columns of the "Medicines" view. yesno = tick for true; image = prescription file of the row
+    var MED_COLUMNS = [
+        { label: 'Sr No', serial: true },
+        { label: 'Recorded Date', key: 'recordedDate' },
+        { label: 'Date', key: 'medDate' },
+        { label: 'Name', key: 'name' },
+        { label: 'Medical Type', key: 'medicalType' },
+        { label: 'Dr Name', key: 'drName' },
+        { label: 'Hospital Name', key: 'hospitalName' },
+        { label: 'Medicine', key: 'medicine' },
+        { label: 'Medicine Description', key: 'description' },
+        { label: 'Morning', key: 'morning', yesno: true },
+        { label: 'Afternoon', key: 'afternoon', yesno: true },
+        { label: 'Night', key: 'night', yesno: true },
+        { label: 'Prescription', key: 'prescriptionFileName', image: true }
+    ];
+    var RECORD_COLUMNS = COLUMNS;
+
     // One dropdown per entry. Options are the unique values found in the table.
-    var FILTERS = [
-        { key: 'name', label: 'Name' },
+    // The Name filter is only for the super user (a normal user sees only his own records).
+    var RECORD_FILTERS = [
+        { key: 'name', label: 'Name', superOnly: true },
         { key: 'hospitalName', label: 'Hospital' },
         { key: 'drName', label: 'Dr Name' },
         { key: 'diagnosticCenter', label: 'Diagnostic Center' }
-    ];
+    ].filter(function (f) { return !f.superOnly || window.isSuperUser; });
+    var FILTERS = RECORD_FILTERS;
+    var mode = 'records';   // "records" = Medical Records, "medicines" = Medicines
+    var viewTypeSelect = document.getElementById('viewType');
     var IMAGE_EXT = ['png', 'jpg', 'jpeg'];
 
     var headRow = document.getElementById('headRow');
@@ -47,6 +69,10 @@
         return '/api/records/files/' + encodeURIComponent(fileId);
     }
 
+    function imageUrl(rowId) {
+        return '/api/medicines/' + encodeURIComponent(rowId) + '/image';
+    }
+
     function extOf(name) {
         var i = name.lastIndexOf('.');
         return i < 0 ? '' : name.slice(i + 1).toLowerCase();
@@ -66,12 +92,15 @@
     }
 
     // ---------- Header ----------
-    COLUMNS.forEach(function (col) {
-        var th = document.createElement('th');
-        th.textContent = col.label;
-        if (col.serial) th.className = 'serial';
-        headRow.appendChild(th);
-    });
+    function renderHeader() {
+        headRow.textContent = '';
+        COLUMNS.forEach(function (col) {
+            var th = document.createElement('th');
+            th.textContent = col.label;
+            if (col.serial) th.className = 'serial';
+            headRow.appendChild(th);
+        });
+    }
 
     // ---------- Filter dropdowns ----------
     function renderFilters() {
@@ -134,7 +163,9 @@
         body.textContent = '';
         var list = visibleRows();
         if (!list.length) {
-            messageRow(rows.length ? 'No records match the selected filters.' : 'No records saved yet. Use "record" to add one.');
+            messageRow(rows.length ? 'No records match the selected filters.'
+                : (mode === 'medicines' ? 'No medicines saved yet. Upload a prescription on the "record" page to add some.'
+                    : 'No records saved yet. Use "record" to add one.'));
             return;
         }
         list.forEach(function (row, index) {
@@ -144,6 +175,22 @@
                 if (col.serial) {
                     td.className = 'serial';
                     td.textContent = String(index + 1);
+                } else if (col.yesno) {
+                    td.className = 'serial';
+                    td.textContent = row[col.key] ? '\u2714' : '';
+                } else if (col.image) {
+                    td.className = 'files-cell';
+                    if (row[col.key]) {
+                        var imgLink = document.createElement('button');
+                        imgLink.type = 'button';
+                        imgLink.className = 'file-link';
+                        imgLink.textContent = row[col.key];
+                        imgLink.title = 'Open ' + row[col.key];
+                        imgLink.addEventListener('click', function () {
+                            openPreview(imageUrl(row.id), row[col.key]);
+                        });
+                        td.appendChild(imgLink);
+                    }
                 } else if (col.files) {
                     td.className = 'files-cell';
                     (row[col.key] || []).forEach(function (file) {
@@ -153,7 +200,7 @@
                         link.textContent = file.fileName;
                         link.title = 'Open ' + file.fileName;
                         link.addEventListener('click', function () {
-                            openPreview(file.id, file.fileName);
+                            openPreview(fileUrl(file.id), file.fileName);
                         });
                         td.appendChild(link);
                     });
@@ -173,7 +220,7 @@
     async function load() {
         msg.textContent = '';
         try {
-            var res = await fetch('/api/records');
+            var res = await fetch(mode === 'medicines' ? '/api/medicines' : '/api/records');
             if (res.status === 401) {
                 window.handleUnauthorized();
                 return;
@@ -182,11 +229,23 @@
             rows = await res.json();
         } catch (e) {
             rows = [];
-            msg.textContent = 'Could not load records from the server';
+            msg.textContent = 'Could not load ' + (mode === 'medicines' ? 'medicines' : 'records') + ' from the server';
         }
+        renderHeader();
         renderFilters();
         render();
     }
+
+    // View Type dropdown: Medical Records (table + filter dropdowns) or Medicines (table only, no other dropdowns)
+    viewTypeSelect.addEventListener('change', function () {
+        mode = viewTypeSelect.value === 'medicines' ? 'medicines' : 'records';
+        COLUMNS = mode === 'medicines' ? MED_COLUMNS : RECORD_COLUMNS;
+        FILTERS = mode === 'medicines' ? [] : RECORD_FILTERS;
+        filtersBox.hidden = mode === 'medicines';
+        selected = {};
+        rows = [];
+        load();
+    });
 
     if (window.isSuperUser) {
         scopeNote.textContent = 'Super user: showing records of all users';
@@ -194,8 +253,7 @@
     }
 
     // ---------- Attachment preview popup ----------
-    function openPreview(fileId, fileName) {
-        var url = fileUrl(fileId);
+    function openPreview(url, fileName) {
         var ext = extOf(fileName);
 
         previewTitle.textContent = fileName;
@@ -249,6 +307,7 @@
 
     function cellValue(col, row, index) {
         if (col.serial) return index + 1;
+        if (col.yesno) return row[col.key] ? 'Yes' : 'No';
         if (col.files) {
             return (row[col.key] || []).map(function (f) { return f.fileName; }).join('; ');
         }
@@ -274,7 +333,7 @@
         var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = safeFilePart(window.loggedInUser) + '_MediRecords.csv'; // e.g. Sai_MediRecords.csv
+        a.download = safeFilePart(window.loggedInUser) + (mode === 'medicines' ? '_MediMedicines.csv' : '_MediRecords.csv'); // e.g. Sai_MediRecords.csv
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediTrack - Record</title>
     <link rel="stylesheet" href="css/records.css">
+    <link rel="stylesheet" href="css/rx.css">
 </head>
 <body>
 <main class="wrap wide">
@@ -93,6 +94,7 @@
                     <input type="file" multiple name="prescription" aria-label="Prescription attachment" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx">
                     <span class="file-text">attachment</span>
                 </label>
+                <button type="button" id="rxOpen" class="link-btn" hidden>Enter medicines of this prescription</button>
             </div>
             <div class="att">
                 <span class="lbl">Bill</span>
@@ -137,8 +139,47 @@
     </div>
 </div>
 
+<!-- Prescription popup: opens when a prescription file is chosen -->
+<div id="rxModal" class="modal" aria-hidden="true">
+    <div class="modal-box rx" role="dialog" aria-modal="true" aria-labelledby="rxTitle">
+        <div class="rx-head">
+            <h2 id="rxTitle">Prescription medicines</h2>
+            <span id="rxCount" class="rx-count"></span>
+        </div>
+        <div class="rx-body">
+            <div id="rxImage" class="rx-image" aria-label="Uploaded prescription"></div>
+            <form id="rxForm" autocomplete="off" novalidate>
+                <div class="rx-fields">
+                    <div class="f"><label for="rxDate">Date <span class="req">*</span></label>
+                        <input type="date" id="rxDate" class="input"></div>
+                    <div class="f"><label for="rxName">Name <span class="req">*</span></label>
+                        <input type="text" id="rxName" class="input" maxlength="100" data-case="title"></div>
+                    <div class="f"><label for="rxType">Medical Type <span class="req">*</span></label>
+                        <select id="rxType" class="input"></select></div>
+                    <div class="f"><label for="rxDr">Dr Name</label>
+                        <input type="text" id="rxDr" class="input" maxlength="100" data-case="title"></div>
+                    <div class="f"><label for="rxHospital">Hospital Name</label>
+                        <input type="text" id="rxHospital" class="input" maxlength="150" data-case="title"></div>
+                </div>
+                <div class="rx-meds">
+                    <h3>Medicines</h3>
+                    <div class="rx-med-head"><span>S.No</span><span>Medicine</span><span>Medicine description</span><span>Morning</span><span>Afternoon</span><span>Night</span><span></span></div>
+                    <div id="rxMeds"></div>
+                    <button type="button" id="rxAdd" class="btn small secondary rx-add">+ Add medicine</button>
+                </div>
+                <div class="rx-actions">
+                    <button type="submit" id="rxSubmit" class="btn">Submit</button>
+                    <button type="button" id="rxCancel" class="btn secondary">Cancel</button>
+                    <p id="rxMsg" class="msg" role="alert"></p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="js/nav.js"></script>
 <script src="js/format.js"></script>
 <script src="js/record.js"></script>
+<script src="js/rx.js"></script>
 </body>
 </html>
