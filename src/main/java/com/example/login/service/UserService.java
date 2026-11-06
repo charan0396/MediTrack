@@ -62,6 +62,7 @@ public class UserService {
         AppUser user = found.get();
         user.setPasswordHash(passwordEncoder.encode(newRawPassword));
         user.setUpdatedDate(LocalDate.now());
+        user.setUpdatedBy(user.getName());
         repository.save(user);
         return true;
     }

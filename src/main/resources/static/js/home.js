@@ -36,12 +36,12 @@
 
     function showRecords(records) {
         $('tRecords').textContent = records.length;
-        $('tRecordsMonth').textContent = records.filter(function (r) { return monthKey(r.recordedDate || r.recordDate) === thisMonth; }).length;
+        $('tRecordsMonth').textContent = records.filter(function (r) { return monthKey(r.createdDate) === thisMonth; }).length;
         var list = $('recentRecords'); list.textContent = '';
-        var sorted = records.slice().sort(function (a, b) { return String(b.recordedDate || '').localeCompare(String(a.recordedDate || '')); });
+        var sorted = records.slice().sort(function (a, b) { return String(b.updatedDate || '').localeCompare(String(a.updatedDate || '')); });
         if (!sorted.length) empty(list, 'No records yet.');
         sorted.slice(0, 5).forEach(function (r) {
-            li(list, (r.name || '-') + ' · ' + (r.medicalType || '-') + (r.hospitalName ? ' · ' + r.hospitalName : ''), String(r.recordDate || '').slice(0, 10));
+            li(list, (r.name || '-') + ' · ' + (r.medicalType || '-') + (r.hospitalName ? ' · ' + r.hospitalName : ''), String(r.createdDate || '').slice(0, 10));
         });
         var counts = {};
         records.forEach(function (r) { var t = r.medicalType || 'Other'; counts[t] = (counts[t] || 0) + 1; });

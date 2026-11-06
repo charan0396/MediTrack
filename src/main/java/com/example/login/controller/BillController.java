@@ -82,9 +82,9 @@ public class BillController {
 
         Bill bill = buildBill(http, name, billDate, medicalShop, invoiceNumber,
                 discountType, discountValue, gstPercent, image);
-        bill.setOwnerName(user);
-        // recorded_date is filled automatically with today's date when the invoice is saved
-        // status, update_date and update_by stay empty until the invoice is edited
+        bill.setCreatedBy(user);
+        // created_date (and updated_date) are filled automatically when the invoice is saved
+        // status and updated_by stay empty until the invoice is edited
 
         Bill saved = billService.save(bill);
 

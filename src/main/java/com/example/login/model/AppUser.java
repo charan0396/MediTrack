@@ -33,12 +33,21 @@ public class AppUser {
     @Column(name = "updated_date")
     private LocalDate updatedDate;
 
+    /** The user who created this user (the user himself when he registers). */
+    @Column(name = "created_by", length = 50)
+    private String createdBy;
+
+    /** The user who last changed this user (the password reset). Empty until then. */
+    @Column(name = "updated_by", length = 50)
+    private String updatedBy;
+
     public AppUser() {
     }
 
     public AppUser(String name, String passwordHash) {
         this.name = name;
         this.passwordHash = passwordHash;
+        this.createdBy = name;
     }
 
     @PrePersist
@@ -58,6 +67,10 @@ public class AppUser {
 
     public LocalDate getCreatedDate() { return createdDate; }
     public void setCreatedDate(LocalDate createdDate) { this.createdDate = createdDate; }
+
+    public String getCreatedBy() { return createdBy; }
+    public String getUpdatedBy() { return updatedBy; }
+    public void setUpdatedBy(String updatedBy) { this.updatedBy = updatedBy; }
 
     public LocalDate getUpdatedDate() { return updatedDate; }
     public void setUpdatedDate(LocalDate updatedDate) { this.updatedDate = updatedDate; }

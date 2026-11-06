@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
@@ -15,7 +16,7 @@ import java.math.BigDecimal;
 /** One product line of a deleted invoice (copy of a bill_items row). */
 @Entity
 @Table(name = "deleted_bill_items")
-public class DeletedBillItem {
+public class DeletedBillItem extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,6 +39,18 @@ public class DeletedBillItem {
     private BigDecimal lineTotal;
 
     public DeletedBillItem() {
+    }
+
+    /** The audit columns of a copied product line follow the deleted invoice it belongs to. */
+    @PrePersist
+    void inheritAudit() {
+        if (deletedBill != null) {
+            if (getCreatedBy() == null) {
+                setCreatedBy(deletedBill.getCreatedBy());
+            }
+            setUpdatedBy(deletedBill.getUpdatedBy());
+            setUpdatedDate(deletedBill.getUpdatedDate());
+        }
     }
 
     public DeletedBillItem(String product, BigDecimal quantity, BigDecimal price, BigDecimal lineTotal) {

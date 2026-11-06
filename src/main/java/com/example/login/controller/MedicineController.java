@@ -110,7 +110,7 @@ public class MedicineController {
         List<Medicine> rows = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             Medicine m = new Medicine();
-            m.setOwnerName(owner);
+            m.setCreatedBy(owner);
             m.setPrescriptionRef(ref);
             m.setSno(i + 1);
             m.setMedDate(medDate);

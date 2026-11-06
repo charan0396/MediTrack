@@ -13,28 +13,28 @@ import java.util.Optional;
 public interface BillRepository extends JpaRepository<Bill, Long> {
 
     /** Product lines of one user's invoices, newest invoice first. No image bytes are read. */
-    @Query("select new com.example.login.dto.BillRow(b.id, b.recordedDate, b.name, b.billDate, b.medicalShop, "
+    @Query("select new com.example.login.dto.BillRow(b.id, b.createdDate, b.name, b.billDate, b.medicalShop, "
             + "b.invoiceNumber, i.product, i.quantity, i.price, i.lineTotal, b.subTotal, b.discountType, "
             + "b.discountValue, b.discountAmount, b.gstPercent, b.gstAmount, b.totalAmount, b.status, "
-            + "b.updateDate, b.updateBy, b.billFileName) "
-            + "from BillItem i join i.bill b where b.ownerName = :owner order by b.id desc, i.id")
+            + "b.updatedDate, b.updatedBy, b.billFileName) "
+            + "from BillItem i join i.bill b where b.createdBy = :owner order by b.id desc, i.id")
     List<BillRow> findRowsByOwner(@Param("owner") String owner);
 
     /** Product lines of every user's invoices (super user). */
-    @Query("select new com.example.login.dto.BillRow(b.id, b.recordedDate, b.name, b.billDate, b.medicalShop, "
+    @Query("select new com.example.login.dto.BillRow(b.id, b.createdDate, b.name, b.billDate, b.medicalShop, "
             + "b.invoiceNumber, i.product, i.quantity, i.price, i.lineTotal, b.subTotal, b.discountType, "
             + "b.discountValue, b.discountAmount, b.gstPercent, b.gstAmount, b.totalAmount, b.status, "
-            + "b.updateDate, b.updateBy, b.billFileName) "
+            + "b.updatedDate, b.updatedBy, b.billFileName) "
             + "from BillItem i join i.bill b order by b.id desc, i.id")
     List<BillRow> findAllRows();
 
-    Optional<Bill> findByIdAndOwnerName(Long id, String ownerName);
+    Optional<Bill> findByIdAndCreatedBy(Long id, String createdBy);
 
     @Query("select new com.example.login.dto.FileData(b.billFileName, b.billImage) from Bill b "
             + "where b.id = :id and b.billImage is not null")
     Optional<FileData> findImage(@Param("id") Long id);
 
     @Query("select new com.example.login.dto.FileData(b.billFileName, b.billImage) from Bill b "
-            + "where b.id = :id and b.ownerName = :owner and b.billImage is not null")
+            + "where b.id = :id and b.createdBy = :owner and b.billImage is not null")
     Optional<FileData> findImageForOwner(@Param("id") Long id, @Param("owner") String owner);
 }

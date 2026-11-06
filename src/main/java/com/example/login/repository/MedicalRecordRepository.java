@@ -11,13 +11,13 @@ import java.util.List;
 public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, Long> {
 
     /** Records of one user, newest first. Text columns only (no files). */
-    @Query("select new com.example.login.dto.RecordBase(r.id, r.recordedDate, r.name, r.recordDate, r.medicalType, r.hospitalName, "
+    @Query("select new com.example.login.dto.RecordBase(r.id, r.updatedDate, r.name, r.createdDate, r.medicalType, r.hospitalName, "
             + "r.drName, r.address, r.diagnosticCenter, r.details, r.diagAddress) "
-            + "from MedicalRecord r where r.ownerName = :owner order by r.id desc")
+            + "from MedicalRecord r where r.createdBy = :owner order by r.id desc")
     List<RecordBase> findBaseByOwner(@Param("owner") String owner);
 
     /** Records of every user (super user), newest first. */
-    @Query("select new com.example.login.dto.RecordBase(r.id, r.recordedDate, r.name, r.recordDate, r.medicalType, r.hospitalName, "
+    @Query("select new com.example.login.dto.RecordBase(r.id, r.updatedDate, r.name, r.createdDate, r.medicalType, r.hospitalName, "
             + "r.drName, r.address, r.diagnosticCenter, r.details, r.diagAddress) "
             + "from MedicalRecord r order by r.id desc")
     List<RecordBase> findAllBase();

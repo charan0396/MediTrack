@@ -7,15 +7,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MiscEntryRepository extends JpaRepository<MiscEntry, Long> {
 
-    String ROW = "select new com.example.login.dto.MiscRow(e.id, e.recordedDate, e.miscDate, e.name, "
-            + "e.description, e.amount, e.ownerName) from MiscEntry e ";
+    String ROW = "select new com.example.login.dto.MiscRow(e.id, e.miscDate, e.name, e.description, e.amount, "
+            + "e.createdBy, e.createdDate, e.updatedBy, e.updatedDate) from MiscEntry e ";
 
-    @Query(ROW + "where e.ownerName = :owner order by e.id desc")
+    @Query(ROW + "where e.createdBy = :owner order by e.id desc")
     List<MiscRow> findRowsByOwner(@Param("owner") String owner);
 
     @Query(ROW + "order by e.id desc")
     List<MiscRow> findAllRows();
+
+    Optional<MiscEntry> findByIdAndCreatedBy(Long id, String createdBy);
 }

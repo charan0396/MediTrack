@@ -70,9 +70,9 @@ public class RecordController {
         }
 
         MedicalRecord record = new MedicalRecord();
-        record.setOwnerName(owner);
+        record.setCreatedBy(owner);
         record.setName(required(name, 100, "Name"));
-        record.setRecordDate(parseDate(date));
+        record.setCreatedDate(parseDate(date).atStartOfDay()); // created_date = the Date typed on the form
         record.setMedicalType(MedicalTypes.find(required(medicalType, 100, "Medical type"))
                 .orElseThrow(() -> new InvalidInputException("Please choose the medical type from the list")));
         record.setHospitalName(optional(hospitalName, 150, "Hospital name"));
@@ -81,7 +81,7 @@ public class RecordController {
         record.setDiagnosticCenter(optional(diagnosticCenter, 150, "Diagnostic center"));
         record.setDetails(optional(details, 1000, "Details"));
         record.setDiagAddress(optional(diagAddress, 255, "Diag address"));
-        // recorded_date is filled automatically with today's date when the record is saved
+        // updated_date is filled automatically with the save date-time
 
         addFiles(record, prescription, RecordAttachment.PRESCRIPTION, "Prescription");
         addFiles(record, bill, RecordAttachment.BILL, "Bill");

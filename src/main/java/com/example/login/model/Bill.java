@@ -9,12 +9,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +22,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "bills")
-public class Bill {
+public class Bill extends Auditable {
 
     /** Set only after the invoice is edited. A new invoice has no status. */
     public static final String STATUS_EDITED = "Edited";
@@ -32,14 +30,6 @@ public class Bill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    /** Login name of the user who saved this invoice. */
-    @Column(name = "owner_name", length = 50)
-    private String ownerName;
-
-    /** The day the invoice was saved. Filled automatically. */
-    @Column(name = "recorded_date")
-    private LocalDate recordedDate;
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;
@@ -85,14 +75,6 @@ public class Bill {
     @Column(name = "status", length = 20)
     private String status;
 
-    /** When the invoice was last edited. Empty until the first edit. */
-    @Column(name = "update_date")
-    private LocalDateTime updateDate;
-
-    /** Login name of the user who last edited the invoice. Empty until the first edit. */
-    @Column(name = "update_by", length = 50)
-    private String updateBy;
-
     /** The captured (uploaded) bill image. Optional. */
     @Column(name = "bill_file_name", length = 255)
     private String billFileName;
@@ -108,25 +90,12 @@ public class Bill {
     @OrderBy("id")
     private List<BillItem> items = new ArrayList<>();
 
-    @PrePersist
-    void onCreate() {
-        if (recordedDate == null) {
-            recordedDate = LocalDate.now();
-        }
-    }
-
     public void addItem(BillItem item) {
         item.setBill(this);
         items.add(item);
     }
 
     public Long getId() { return id; }
-
-    public String getOwnerName() { return ownerName; }
-    public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
-
-    public LocalDate getRecordedDate() { return recordedDate; }
-    public void setRecordedDate(LocalDate recordedDate) { this.recordedDate = recordedDate; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -163,12 +132,6 @@ public class Bill {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-
-    public LocalDateTime getUpdateDate() { return updateDate; }
-    public void setUpdateDate(LocalDateTime updateDate) { this.updateDate = updateDate; }
-
-    public String getUpdateBy() { return updateBy; }
-    public void setUpdateBy(String updateBy) { this.updateBy = updateBy; }
 
     public String getBillFileName() { return billFileName; }
     public void setBillFileName(String billFileName) { this.billFileName = billFileName; }

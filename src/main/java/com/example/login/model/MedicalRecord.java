@@ -7,35 +7,25 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * One saved record. created_by = the user who saved it; created_date = the "Date" typed on the record form;
+ * updated_date = the day it was saved (automatic).
+ */
 @Entity
 @Table(name = "medical_records")
-public class MedicalRecord {
+public class MedicalRecord extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** Login name of the user who saved this record. */
-    @Column(name = "owner_name", length = 50)
-    private String ownerName;
-
-    /** The day the record was submitted. Filled automatically on save. */
-    @Column(name = "recorded_date")
-    private LocalDate recordedDate;
-
     @Column(name = "name", nullable = false, length = 100)
     private String name;
-
-    /** The "Date" typed on the record form. */
-    @Column(name = "record_date", nullable = false)
-    private LocalDate recordDate;
 
     /** Mandatory on the record form. Enforced by the app (not NOT NULL) so older rows still load. */
     @Column(name = "medical_type", length = 100)
@@ -63,13 +53,6 @@ public class MedicalRecord {
     @OneToMany(mappedBy = "medicalRecord", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecordAttachment> attachments = new ArrayList<>();
 
-    @PrePersist
-    void onCreate() {
-        if (recordedDate == null) {
-            recordedDate = LocalDate.now();
-        }
-    }
-
     public void addAttachment(RecordAttachment attachment) {
         attachment.setMedicalRecord(this);
         attachments.add(attachment);
@@ -77,17 +60,8 @@ public class MedicalRecord {
 
     public Long getId() { return id; }
 
-    public String getOwnerName() { return ownerName; }
-    public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
-
-    public LocalDate getRecordedDate() { return recordedDate; }
-    public void setRecordedDate(LocalDate recordedDate) { this.recordedDate = recordedDate; }
-
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-
-    public LocalDate getRecordDate() { return recordDate; }
-    public void setRecordDate(LocalDate recordDate) { this.recordDate = recordDate; }
 
     public String getMedicalType() { return medicalType; }
     public void setMedicalType(String medicalType) { this.medicalType = medicalType; }

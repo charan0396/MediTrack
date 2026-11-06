@@ -1,11 +1,12 @@
 package com.example.login.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /** One medicine row for the "Medicines" view. prescriptionFileName is null when no prescription file was attached. */
 public record MedicineRow(
         Long id,
-        LocalDate recordedDate,
+        LocalDateTime createdDate,
         LocalDate medDate,
         String name,
         String medicalType,

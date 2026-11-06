@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
@@ -15,7 +16,7 @@ import java.math.BigDecimal;
 /** One product line of an invoice. An invoice can have many of these. */
 @Entity
 @Table(name = "bill_items")
-public class BillItem {
+public class BillItem extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,6 +41,20 @@ public class BillItem {
     private BigDecimal lineTotal;
 
     public BillItem() {
+    }
+
+    /** The audit columns of a product line follow the invoice it belongs to. */
+    @PrePersist
+    void inheritAudit() {
+        if (bill != null) {
+            if (getCreatedBy() == null) {
+                setCreatedBy(bill.getCreatedBy());
+            }
+            if (bill.getUpdatedBy() != null) {
+                setUpdatedBy(bill.getUpdatedBy());
+                setUpdatedDate(bill.getUpdatedDate());
+            }
+        }
     }
 
     public BillItem(String product, BigDecimal quantity, BigDecimal price, BigDecimal lineTotal) {

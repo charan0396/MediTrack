@@ -2,9 +2,9 @@
     // Table columns, in display order. serial = running number, files = list of attachments
     var COLUMNS = [
         { label: 'Sr No', serial: true },
-        { label: 'Recorded Date', key: 'recordedDate' },
+        { label: 'Recorded Date', key: 'updatedDate', date: true },
         { label: 'Name', key: 'name' },
-        { label: 'Date', key: 'recordDate' },
+        { label: 'Date', key: 'createdDate', date: true },
         { label: 'Medical Type', key: 'medicalType' },
         { label: 'Hospital Name', key: 'hospitalName' },
         { label: 'Dr Name', key: 'drName' },
@@ -21,8 +21,8 @@
     // Columns of the "Medicines" view. yesno = tick for true; image = prescription file of the row
     var MED_COLUMNS = [
         { label: 'Sr No', serial: true },
-        { label: 'Recorded Date', key: 'recordedDate' },
-        { label: 'Date', key: 'medDate' },
+        { label: 'Recorded Date', key: 'createdDate', date: true },
+        { label: 'Date', key: 'medDate', date: true },
         { label: 'Name', key: 'name' },
         { label: 'Medical Type', key: 'medicalType' },
         { label: 'Dr Name', key: 'drName' },
@@ -206,6 +206,7 @@
                     });
                 } else {
                     var value = row[col.key];
+                    if (col.date && value) value = String(value).slice(0, 10);
                     if (value !== null && value !== undefined && value !== '') {
                         td.textContent = value;
                         td.title = value;
@@ -308,6 +309,7 @@
     function cellValue(col, row, index) {
         if (col.serial) return index + 1;
         if (col.yesno) return row[col.key] ? 'Yes' : 'No';
+        if (col.date) return row[col.key] ? String(row[col.key]).slice(0, 10) : '';
         if (col.files) {
             return (row[col.key] || []).map(function (f) { return f.fileName; }).join('; ');
         }

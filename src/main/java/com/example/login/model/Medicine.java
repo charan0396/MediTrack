@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 import java.time.LocalDate;
@@ -18,19 +17,11 @@ import java.time.LocalDate;
  */
 @Entity
 @Table(name = "medicines")
-public class Medicine {
+public class Medicine extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    /** Login name of the user who saved this row. */
-    @Column(name = "owner_name", length = 50)
-    private String ownerName;
-
-    /** The day the row was saved. Filled automatically. */
-    @Column(name = "recorded_date")
-    private LocalDate recordedDate;
 
     /** Same value on every row of one prescription. */
     @Column(name = "prescription_ref", nullable = false, length = 36)
@@ -81,14 +72,6 @@ public class Medicine {
     @Column(name = "prescription_image")
     private byte[] prescriptionImage;
 
-    @PrePersist
-    void onCreate() {
-        if (recordedDate == null) {
-            recordedDate = LocalDate.now();
-        }
-    }
-
-    public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
     public void setPrescriptionRef(String prescriptionRef) { this.prescriptionRef = prescriptionRef; }
     public void setSno(int sno) { this.sno = sno; }
     public void setMedDate(LocalDate medDate) { this.medDate = medDate; }

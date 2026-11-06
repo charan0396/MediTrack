@@ -1,13 +1,13 @@
 package com.example.login.dto;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-/** Text columns of one record (loaded by the list query, without any file data). */
+/** updatedDate = the day the record was saved, createdDate = the Date typed on the form. Text columns of one record (loaded by the list query, without any file data). */
 public record RecordBase(
         Long id,
-        LocalDate recordedDate,
+        LocalDateTime updatedDate,
         String name,
-        LocalDate recordDate,
+        LocalDateTime createdDate,
         String medicalType,
         String hospitalName,
         String drName,

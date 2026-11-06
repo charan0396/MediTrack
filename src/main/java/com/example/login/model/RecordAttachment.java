@@ -9,12 +9,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 /** One uploaded file (BLOB) belonging to a record. A record can have many files per category. */
 @Entity
 @Table(name = "record_attachments")
-public class RecordAttachment {
+public class RecordAttachment extends Auditable {
 
     public static final String PRESCRIPTION = "prescription";
     public static final String BILL = "bill";
@@ -44,6 +45,14 @@ public class RecordAttachment {
     private byte[] data;
 
     public RecordAttachment() {
+    }
+
+    /** The audit columns of a file follow the record it belongs to. */
+    @PrePersist
+    void inheritAudit() {
+        if (medicalRecord != null && getCreatedBy() == null) {
+            setCreatedBy(medicalRecord.getCreatedBy());
+        }
     }
 
     public RecordAttachment(String category, String fileName, String contentType, byte[] data) {

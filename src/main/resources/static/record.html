@@ -27,7 +27,7 @@
         <div class="grid">
             <div class="f">
                 <label for="recName">Name <span class="req" title="Required">*</span></label>
-                <input type="text" id="recName" name="name" class="input" maxlength="100" data-case="title">
+                <input type="text" id="recName" name="name" class="input" maxlength="100" data-case="title" aria-required="true">
             </div>
             <div class="f">
                 <label for="recDate">Date <span class="req" title="Required">*</span></label>
@@ -95,6 +95,7 @@
                     <span class="file-text">attachment</span>
                 </label>
                 <button type="button" id="rxOpen" class="link-btn" hidden>Enter medicines of this prescription</button>
+                <button type="button" id="rxClear" class="link-btn" hidden>Clear prescription</button>
             </div>
             <div class="att">
                 <span class="lbl">Bill</span>
@@ -170,6 +171,7 @@
                 <div class="rx-actions">
                     <button type="submit" id="rxSubmit" class="btn">Submit</button>
                     <button type="button" id="rxCancel" class="btn secondary">Cancel</button>
+                    <button type="button" id="rxDiscard" class="btn secondary" title="Remove the chosen prescription file">Clear prescription</button>
                     <p id="rxMsg" class="msg" role="alert"></p>
                 </div>
             </form>

@@ -46,12 +46,12 @@ public class BillService {
     /**
      * Edit: replaces the invoice details and all of its products with those of {@code changes}
      * (an unsaved Bill built from the edited form). The bill image is replaced only when {@code changes}
-     * carries a new one. Status, update date and update by are set here, and only here.
+     * carries a new one. Status, updated_by and updated_date are set here, and only here.
      * Returns false when the invoice does not exist or belongs to another user.
      */
     @Transactional
     public boolean update(Long billId, String user, boolean allUsers, Bill changes) {
-        Optional<Bill> found = allUsers ? bills.findById(billId) : bills.findByIdAndOwnerName(billId, user);
+        Optional<Bill> found = allUsers ? bills.findById(billId) : bills.findByIdAndCreatedBy(billId, user);
         if (found.isEmpty()) {
             return false;
         }
@@ -81,8 +81,7 @@ public class BillService {
         }
 
         bill.setStatus(Bill.STATUS_EDITED);
-        bill.setUpdateDate(LocalDateTime.now());
-        bill.setUpdateBy(user);
+        bill.touch(user); // updated_by and updated_date
         return true;
     }
 
@@ -94,7 +93,7 @@ public class BillService {
      */
     @Transactional
     public boolean delete(Long billId, String user, boolean allUsers) {
-        Optional<Bill> found = allUsers ? bills.findById(billId) : bills.findByIdAndOwnerName(billId, user);
+        Optional<Bill> found = allUsers ? bills.findById(billId) : bills.findByIdAndCreatedBy(billId, user);
         if (found.isEmpty()) {
             return false;
         }

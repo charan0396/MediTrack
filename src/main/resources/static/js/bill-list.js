@@ -201,7 +201,7 @@
                 if (i === 0) {
                     [
                         [String(index + 1), 'serial merged'],
-                        [text(h.recordedDate), 'merged'],
+                        [text(h.createdDate).slice(0, 10), 'merged'],
                         [text(h.name), 'merged'],
                         [text(h.billDate), 'merged'],
                         [text(h.medicalShop), 'merged'],
@@ -244,7 +244,7 @@
                         statusTd.appendChild(badge);
                     }
                     tr.appendChild(statusTd);
-                    [dateTime(h.updateDate), text(h.updateBy)].forEach(function (v) {
+                    [dateTime(h.updatedDate), text(h.updatedBy)].forEach(function (v) {
                         var td = cell(v, 'merged');
                         td.rowSpan = span;
                         tr.appendChild(td);
@@ -381,11 +381,11 @@
             var h = g.head;
             g.lines.forEach(function (line) {
                 lines.push([
-                    index + 1, h.recordedDate, h.name, h.billDate, h.medicalShop, h.invoiceNumber, line.product,
+                    index + 1, text(h.createdDate).slice(0, 10), h.name, h.billDate, h.medicalShop, h.invoiceNumber, line.product,
                     Number(line.quantity), plain(line.price), plain(line.lineTotal), plain(subTotalOf(g)),
                     plain(h.discountAmount),
                     h.gstPercent === null || h.gstPercent === undefined ? '' : Number(h.gstPercent),
-                    plain(h.gstAmount), plain(h.totalAmount), h.status, dateTime(h.updateDate), h.updateBy,
+                    plain(h.gstAmount), plain(h.totalAmount), h.status, dateTime(h.updatedDate), h.updatedBy,
                     h.billFileName
                 ].map(csvCell).join(','));
             });

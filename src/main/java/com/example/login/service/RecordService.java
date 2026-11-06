@@ -41,7 +41,7 @@ public class RecordService {
 
         return base.stream().map(b -> {
             List<FileRef> files = filesByRecord.getOrDefault(b.id(), List.of());
-            return new RecordView(b.id(), b.recordedDate(), b.name(), b.recordDate(), b.medicalType(), b.hospitalName(),
+            return new RecordView(b.id(), b.updatedDate(), b.name(), b.createdDate(), b.medicalType(), b.hospitalName(),
                     b.drName(), b.address(), b.diagnosticCenter(), b.details(), b.diagAddress(),
                     pick(files, RecordAttachment.PRESCRIPTION),
                     pick(files, RecordAttachment.BILL),

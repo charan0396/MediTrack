@@ -20,11 +20,11 @@ import java.util.List;
 /**
  * A copy of an invoice that was deleted, kept so deletions can be tracked. When a user deletes an invoice it is
  * removed from {@code bills} and a full copy (with its products and bill image) is saved here.
- * status is "Deleted"; update_date / update_by say when and by whom.
+ * status is "Deleted"; updated_by / updated_date say who deleted it and when.
  */
 @Entity
 @Table(name = "deleted_bills")
-public class DeletedBill {
+public class DeletedBill extends Auditable {
 
     public static final String STATUS_DELETED = "Deleted";
 
@@ -35,12 +35,6 @@ public class DeletedBill {
     /** The id this invoice had in the bills table. */
     @Column(name = "original_bill_id", nullable = false)
     private Long originalBillId;
-
-    @Column(name = "owner_name", length = 50)
-    private String ownerName;
-
-    @Column(name = "recorded_date")
-    private LocalDate recordedDate;
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;
@@ -89,14 +83,6 @@ public class DeletedBill {
     @Column(name = "status", nullable = false, length = 20)
     private String status;
 
-    /** When the invoice was deleted. */
-    @Column(name = "update_date", nullable = false)
-    private LocalDateTime updateDate;
-
-    /** Login name of the user who deleted the invoice. */
-    @Column(name = "update_by", nullable = false, length = 50)
-    private String updateBy;
-
     @OneToMany(mappedBy = "deletedBill", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id")
     private List<DeletedBillItem> items = new ArrayList<>();
@@ -108,8 +94,9 @@ public class DeletedBill {
     public static DeletedBill copyOf(Bill bill, String deletedBy, LocalDateTime deletedAt) {
         DeletedBill d = new DeletedBill();
         d.originalBillId = bill.getId();
-        d.ownerName = bill.getOwnerName();
-        d.recordedDate = bill.getRecordedDate();
+        // created_by / created_date are those of the original invoice
+        d.setCreatedBy(bill.getCreatedBy());
+        d.setCreatedDate(bill.getCreatedDate());
         d.name = bill.getName();
         d.billDate = bill.getBillDate();
         d.medicalShop = bill.getMedicalShop();
@@ -125,8 +112,9 @@ public class DeletedBill {
         d.billContentType = bill.getBillContentType();
         d.billImage = bill.getBillImage();
         d.status = STATUS_DELETED;
-        d.updateDate = deletedAt;
-        d.updateBy = deletedBy;
+        // updated_by / updated_date say who deleted the invoice and when
+        d.setUpdatedBy(deletedBy);
+        d.setUpdatedDate(deletedAt);
         for (BillItem item : bill.getItems()) {
             DeletedBillItem copy = new DeletedBillItem(item.getProduct(), item.getQuantity(), item.getPrice(), item.getLineTotal());
             copy.setDeletedBill(d);
@@ -137,8 +125,6 @@ public class DeletedBill {
 
     public Long getId() { return id; }
     public Long getOriginalBillId() { return originalBillId; }
-    public String getOwnerName() { return ownerName; }
-    public LocalDate getRecordedDate() { return recordedDate; }
     public String getName() { return name; }
     public LocalDate getBillDate() { return billDate; }
     public String getMedicalShop() { return medicalShop; }
@@ -154,7 +140,5 @@ public class DeletedBill {
     public String getBillContentType() { return billContentType; }
     public byte[] getBillImage() { return billImage; }
     public String getStatus() { return status; }
-    public LocalDateTime getUpdateDate() { return updateDate; }
-    public String getUpdateBy() { return updateBy; }
     public List<DeletedBillItem> getItems() { return items; }
 }

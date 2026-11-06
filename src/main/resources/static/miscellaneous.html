@@ -22,6 +22,11 @@
 
     <h1 class="page-title">Miscellaneous</h1>
 
+    <p id="miscEditBanner" class="edit-banner" hidden>
+        <span id="miscEditText"></span>
+        <button type="button" id="miscCancelEdit" class="btn small secondary">Cancel edit</button>
+    </p>
+
     <div class="form-wrap">
     <form id="miscForm" autocomplete="off" novalidate>
         <div class="grid">
@@ -31,7 +36,7 @@
             </div>
             <div class="f">
                 <label for="miscName">Name <span class="req" title="Required">*</span></label>
-                <input type="text" id="miscName" name="name" class="input" maxlength="100" data-case="title">
+                <input type="text" id="miscName" name="name" class="input" maxlength="100" data-case="title" aria-required="true">
             </div>
             <div class="f">
                 <label for="miscAmount">Amount <span class="req" title="Required">*</span></label>
@@ -50,8 +55,22 @@
     </div>
 
     <h2 class="sub-title">Saved entries <span id="miscTotal" class="note-inline"></span></h2>
+
+    <div class="toolbar">
+        <div class="filters" role="group" aria-label="Filters">
+            <label class="filter"><span>Name</span>
+                <select id="fltName" aria-label="Filter by name"><option value="">All</option></select></label>
+            <label class="filter"><span>Date from</span>
+                <input type="date" id="fltFrom" aria-label="Date from"></label>
+            <label class="filter"><span>Date to</span>
+                <input type="date" id="fltTo" aria-label="Date to"></label>
+            <button type="button" id="fltClear" class="nav-btn small-btn">clear filters</button>
+        </div>
+        <button type="button" id="miscDownload" class="nav-btn">download</button>
+    </div>
+
     <div class="table-wrap" tabindex="0" aria-label="Saved miscellaneous entries">
-        <table class="data">
+        <table class="data misc-table">
             <thead><tr id="miscHead"></tr></thead>
             <tbody id="miscBody"></tbody>
         </table>

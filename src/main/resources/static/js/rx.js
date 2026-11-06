@@ -4,6 +4,7 @@
     var MAX_MEDICINES = 30;
     var fileInput = document.querySelector('input[name="prescription"]');
     var openBtn = document.getElementById('rxOpen');
+    var clearBtn = document.getElementById('rxClear');
     if (!fileInput) return;
 
     var modal = document.getElementById('rxModal');
@@ -128,6 +129,7 @@
 
     function refreshOpenBtn() {
         openBtn.hidden = pending().length === 0;
+        clearBtn.hidden = fileInput.files.length === 0;   // "Clear prescription" while a file is chosen
     }
 
     function start() {
@@ -143,6 +145,15 @@
         if (fileInput.files.length) start();
     });
     openBtn.addEventListener('click', start);
+
+    // Clear: drop the chosen prescription file(s) (not wanted, or the wrong file). Medicines already saved stay saved.
+    function clearPrescription() {
+        if (modal.classList.contains('open')) close();
+        fileInput.value = '';
+        fileInput.dispatchEvent(new Event('change', { bubbles: true })); // record.js resets the label, this file resets the links
+    }
+    clearBtn.addEventListener('click', clearPrescription);
+    document.getElementById('rxDiscard').addEventListener('click', clearPrescription); // same button inside the popup
     document.getElementById('rxAdd').addEventListener('click', function () {
         setMsg('');
         addMedicine().querySelector('.med-name').focus();
