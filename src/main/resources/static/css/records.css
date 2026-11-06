@@ -471,8 +471,9 @@ table.data {
 /* ---------- Header: logged-in user ---------- */
 .user {
     color: #fff;
-    font-size: 16px;
+    font-size: 20px;
     white-space: nowrap;
+    text-transform: capitalize;
 }
 
 .user::before {
