@@ -62,6 +62,10 @@
     var previewDownload = document.getElementById('previewDownload');
     var previewClose = document.getElementById('previewClose');
 
+    var dateFilter = document.getElementById('dateFilter');
+    var dateFrom = document.getElementById('dateFrom');
+    var dateTo = document.getElementById('dateTo');
+
     var rows = [];      // everything the server returned for this user
     var selected = {};  // filter key -> chosen value ('' or missing = All)
 
@@ -85,6 +89,11 @@
     // Rows that match every dropdown that is not on "All"
     function visibleRows() {
         return rows.filter(function (row) {
+            // date range on the "Date" column (records: createdDate, medicines: medDate)
+            var dv = row[mode === 'medicines' ? 'medDate' : 'createdDate'];
+            var d = dv ? String(dv).slice(0, 10) : '';
+            if (dateFrom.value && (!d || d < dateFrom.value)) return false;
+            if (dateTo.value && (!d || d > dateTo.value)) return false;
             return FILTERS.every(function (f) {
                 return !selected[f.key] || norm(row[f.key]) === selected[f.key];
             });
@@ -100,6 +109,10 @@
             if (col.serial) th.className = 'serial';
             headRow.appendChild(th);
         });
+        var act = document.createElement('th');
+        act.textContent = 'Action';
+        act.className = 'serial';
+        headRow.appendChild(act);
     }
 
     // ---------- Filter dropdowns ----------
@@ -152,7 +165,7 @@
     function messageRow(text) {
         var tr = document.createElement('tr');
         var td = document.createElement('td');
-        td.colSpan = COLUMNS.length;
+        td.colSpan = COLUMNS.length + 1;
         td.className = 'empty';
         td.textContent = text;
         tr.appendChild(td);
@@ -214,9 +227,30 @@
                 }
                 tr.appendChild(td);
             });
+            var actTd = document.createElement('td');
+            actTd.className = 'serial';
+            var editBtn = document.createElement('button');
+            editBtn.type = 'button';
+            editBtn.className = 'file-link';
+            editBtn.textContent = 'Edit';
+            editBtn.title = mode === 'medicines' ? 'Edit this prescription' : 'Edit this record';
+            editBtn.addEventListener('click', function () {
+                if (mode === 'medicines') window.Rx.edit(row, rows);
+                else window.location.href = 'record.html?edit=' + encodeURIComponent(row.id);
+            });
+            actTd.appendChild(editBtn);
+            tr.appendChild(actTd);
             body.appendChild(tr);
         });
     }
+
+    document.addEventListener('rx-saved', load);
+    [dateFrom, dateTo].forEach(function (el) { el.addEventListener('change', render); });
+    document.getElementById('dateClear').addEventListener('click', function () {
+        dateFrom.value = '';
+        dateTo.value = '';
+        render();
+    });
 
     async function load() {
         msg.textContent = '';
@@ -243,6 +277,8 @@
         COLUMNS = mode === 'medicines' ? MED_COLUMNS : RECORD_COLUMNS;
         FILTERS = mode === 'medicines' ? [] : RECORD_FILTERS;
         filtersBox.hidden = mode === 'medicines';
+        dateFrom.value = '';
+        dateTo.value = '';
         selected = {};
         rows = [];
         load();
@@ -265,6 +301,13 @@
         if (IMAGE_EXT.indexOf(ext) !== -1) {
             var img = document.createElement('img');
             img.alt = fileName;
+            img.addEventListener('error', function () {
+                previewBody.textContent = '';
+                var p = document.createElement('p');
+                p.className = 'preview-note';
+                p.textContent = 'The file could not be loaded.';
+                previewBody.appendChild(p);
+            });
             img.src = url;
             previewBody.appendChild(img);
         } else if (ext === 'pdf') {

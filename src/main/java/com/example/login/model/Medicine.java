@@ -72,6 +72,8 @@ public class Medicine extends Auditable {
     @Column(name = "prescription_image")
     private byte[] prescriptionImage;
 
+    public String getPrescriptionRef() { return prescriptionRef; }
+    public String getPrescriptionFileName() { return prescriptionFileName; }
     public void setPrescriptionRef(String prescriptionRef) { this.prescriptionRef = prescriptionRef; }
     public void setSno(int sno) { this.sno = sno; }
     public void setMedDate(LocalDate medDate) { this.medDate = medDate; }

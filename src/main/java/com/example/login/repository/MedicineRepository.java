@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
-    String ROW = "select new com.example.login.dto.MedicineRow(m.id, m.createdDate, m.medDate, m.name, "
+    String ROW = "select new com.example.login.dto.MedicineRow(m.id, m.prescriptionRef, m.createdDate, m.medDate, m.name, "
             + "m.medicalType, m.drName, m.hospitalName, m.sno, m.medicine, m.description, m.morning, "
             + "m.afternoon, m.night, m.prescriptionFileName) from Medicine m ";
 
@@ -23,6 +23,9 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
     /** Every user's medicines (super user). */
     @Query(ROW + "order by m.createdDate desc, m.id")
     List<MedicineRow> findAllRows();
+
+    /** The rows of one prescription in order (for editing). */
+    List<Medicine> findByPrescriptionRefOrderBySnoAscIdAsc(String prescriptionRef);
 
     /** The prescription image that belongs to the prescription of row {@code id}. */
     @Query("select new com.example.login.dto.FileData(m.prescriptionFileName, m.prescriptionImage) from Medicine m "

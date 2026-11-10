@@ -261,7 +261,7 @@
             '<button type="button" class="rm" title="Remove this product">&times;</button></div>' +
             '<div class="fld" style="--c:#f472b6">' +
             '<div class="fld-top"><label for="p' + n + 'n"><i class="dot"></i>Product</label><span class="here">Filling here</span></div>' +
-            '<input type="text" id="p' + n + 'n" class="input" data-kind="text" data-case="title" data-role="product" maxlength="200" placeholder="e.g. medicine or item name">' +
+            '<input type="text" id="p' + n + 'n" class="input" data-kind="text" data-case="title" data-suggest="product" data-role="product" maxlength="200" placeholder="e.g. medicine or item name">' +
             '</div>' +
             '<div class="trio">' +
             '<div class="fld" style="--c:#fbbf24">' +

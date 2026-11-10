@@ -2,8 +2,8 @@ package com.example.login.controller;
 
 import com.example.login.config.AccessPolicy;
 import com.example.login.dto.FileData;
-import com.example.login.model.Medicine;
 import com.example.login.repository.MedicineRepository;
+import com.example.login.service.MedicineService;
 import com.example.login.util.FileTypes;
 import com.example.login.util.MedicalTypes;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 /** Medicines of a prescription: saved from the prescription popup of the record page, listed in the view page. */
 @RestController
@@ -40,10 +39,12 @@ public class MedicineController {
     private static final int MAX_MEDICINES = 30;
 
     private final MedicineRepository medicines;
+    private final MedicineService service;
     private final AccessPolicy accessPolicy;
 
-    public MedicineController(MedicineRepository medicines, AccessPolicy accessPolicy) {
+    public MedicineController(MedicineRepository medicines, MedicineService service, AccessPolicy accessPolicy) {
         this.medicines = medicines;
+        this.service = service;
         this.accessPolicy = accessPolicy;
     }
 
@@ -61,12 +62,45 @@ public class MedicineController {
             @RequestParam(required = false) String hospitalName,
             @RequestParam(required = false) MultipartFile image) throws IOException {
 
-        String owner = SessionUser.get(http);
-        if (owner == null) {
+        String user = SessionUser.get(http);
+        if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("success", false, "message", "Please log in again"));
         }
+        MedicineService.Prescription p = parse(http, name, date, medicalType, drName, hospitalName, image);
+        service.create(user, p);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Map.of("success", true, "message", "Medicines saved successfully", "count", p.lines().size()));
+    }
 
+    /** Edit a saved prescription (row id = any medicine row of it). Same fields as saving; the file is optional. */
+    @PostMapping(value = "/{id}/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, Object>> update(
+            HttpServletRequest http,
+            @PathVariable Long id,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String date,
+            @RequestParam(required = false) String medicalType,
+            @RequestParam(required = false) String drName,
+            @RequestParam(required = false) String hospitalName,
+            @RequestParam(required = false) MultipartFile image) throws IOException {
+
+        String user = SessionUser.get(http);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("success", false, "message", "Please log in again"));
+        }
+        MedicineService.Prescription p = parse(http, name, date, medicalType, drName, hospitalName, image);
+        if (!service.update(id, user, accessPolicy.isSuper(user), p)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("success", false, "message", "Prescription not found"));
+        }
+        return ResponseEntity.ok(Map.of("success", true, "message", "Medicines updated successfully"));
+    }
+
+    private static MedicineService.Prescription parse(HttpServletRequest http, String name, String date,
+                                                      String medicalType, String drName, String hospitalName,
+                                                      MultipartFile image) throws IOException {
         String cleanName = required(name, 100, "Name");
         LocalDate medDate = parseDate(date);
         String type = MedicalTypes.find(required(medicalType, 100, "Medical type"))
@@ -85,6 +119,15 @@ public class MedicineController {
         }
         if (count > MAX_MEDICINES) {
             throw new InvalidInputException("A prescription can have at most " + MAX_MEDICINES + " medicines");
+        }
+        List<MedicineService.Line> lines = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            lines.add(new MedicineService.Line(
+                    required(at(names, i), 200, "Medicine " + (i + 1)),
+                    optional(at(descriptions, i), 500, "Medicine description " + (i + 1)),
+                    "true".equalsIgnoreCase(at(morning, i)),
+                    "true".equalsIgnoreCase(at(afternoon, i)),
+                    "true".equalsIgnoreCase(at(night, i))));
         }
 
         String fileName = null;
@@ -105,35 +148,7 @@ public class MedicineController {
             contentType = FileTypes.contentType(fileName);
             bytes = image.getBytes();
         }
-
-        String ref = UUID.randomUUID().toString();
-        List<Medicine> rows = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            Medicine m = new Medicine();
-            m.setCreatedBy(owner);
-            m.setPrescriptionRef(ref);
-            m.setSno(i + 1);
-            m.setMedDate(medDate);
-            m.setName(cleanName);
-            m.setMedicalType(type);
-            m.setDrName(dr);
-            m.setHospitalName(hospital);
-            m.setMedicine(required(at(names, i), 200, "Medicine " + (i + 1)));
-            m.setDescription(optional(at(descriptions, i), 500, "Medicine description " + (i + 1)));
-            m.setMorning("true".equalsIgnoreCase(at(morning, i)));
-            m.setAfternoon("true".equalsIgnoreCase(at(afternoon, i)));
-            m.setNight("true".equalsIgnoreCase(at(night, i)));
-            m.setPrescriptionFileName(fileName);
-            m.setPrescriptionContentType(contentType);
-            if (i == 0) {
-                m.setPrescriptionImage(bytes); // stored once per prescription
-            }
-            rows.add(m);
-        }
-        medicines.saveAll(rows);
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Map.of("success", true, "message", "Medicines saved successfully", "count", count));
+        return new MedicineService.Prescription(cleanName, medDate, type, dr, hospital, lines, fileName, contentType, bytes);
     }
 
     /** The logged-in user's medicines, or everyone's for the super user. */
@@ -157,8 +172,7 @@ public class MedicineController {
         if (owner == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        Optional<FileData> found = accessPolicy.isSuper(owner)
-                ? medicines.findImage(id) : medicines.findImageForOwner(id, owner);
+        Optional<FileData> found = service.findImage(id, owner, accessPolicy.isSuper(owner));
         if (found.isEmpty()) {
             return ResponseEntity.notFound().build();
         }

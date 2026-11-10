@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -71,16 +72,7 @@ public class RecordController {
 
         MedicalRecord record = new MedicalRecord();
         record.setCreatedBy(owner);
-        record.setName(required(name, 100, "Name"));
-        record.setCreatedDate(parseDate(date).atStartOfDay()); // created_date = the Date typed on the form
-        record.setMedicalType(MedicalTypes.find(required(medicalType, 100, "Medical type"))
-                .orElseThrow(() -> new InvalidInputException("Please choose the medical type from the list")));
-        record.setHospitalName(optional(hospitalName, 150, "Hospital name"));
-        record.setDrName(optional(drName, 100, "Dr name"));
-        record.setAddress(optional(address, 255, "Address"));
-        record.setDiagnosticCenter(optional(diagnosticCenter, 150, "Diagnostic center"));
-        record.setDetails(optional(details, 1000, "Details"));
-        record.setDiagAddress(optional(diagAddress, 255, "Diag address"));
+        applyFields(record, name, date, medicalType, hospitalName, drName, address, diagnosticCenter, details, diagAddress);
         // updated_date is filled automatically with the save date-time
 
         addFiles(record, prescription, RecordAttachment.PRESCRIPTION, "Prescription");
@@ -91,6 +83,51 @@ public class RecordController {
         MedicalRecord saved = recordService.save(record);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Map.of("success", true, "message", "Record saved successfully", "id", saved.getId()));
+    }
+
+    /**
+     * Edit a record: same fields as saving. removeFile = ids of existing files to delete; new files are added.
+     */
+    @PostMapping(value = "/{id}/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, Object>> update(
+            HttpServletRequest http,
+            @PathVariable Long id,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String date,
+            @RequestParam(required = false) String medicalType,
+            @RequestParam(required = false) String hospitalName,
+            @RequestParam(required = false) String drName,
+            @RequestParam(required = false) String address,
+            @RequestParam(required = false) String diagnosticCenter,
+            @RequestParam(required = false) String details,
+            @RequestParam(required = false) String diagAddress,
+            @RequestParam(required = false) List<Long> removeFile,
+            @RequestParam(required = false) List<MultipartFile> prescription,
+            @RequestParam(required = false) List<MultipartFile> bill,
+            @RequestParam(required = false) List<MultipartFile> scanDocuments,
+            @RequestParam(required = false) List<MultipartFile> others) throws IOException {
+
+        String user = SessionUser.get(http);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(notLoggedInBody());
+        }
+
+        MedicalRecord changes = new MedicalRecord();
+        applyFields(changes, name, date, medicalType, hospitalName, drName, address, diagnosticCenter, details, diagAddress);
+
+        List<RecordAttachment> added = new ArrayList<>();
+        collectFiles(added, prescription, RecordAttachment.PRESCRIPTION, "Prescription");
+        collectFiles(added, bill, RecordAttachment.BILL, "Bill");
+        collectFiles(added, scanDocuments, RecordAttachment.SCAN, "Scan documents");
+        collectFiles(added, others, RecordAttachment.OTHERS, "Others");
+
+        boolean found = recordService.update(id, user, accessPolicy.isSuper(user), changes,
+                removeFile == null ? List.of() : removeFile, added);
+        if (!found) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("success", false, "message", "Record not found"));
+        }
+        return ResponseEntity.ok(Map.of("success", true, "message", "Record updated successfully", "id", id));
     }
 
     /**
@@ -173,9 +210,33 @@ public class RecordController {
         }
     }
 
+    /** Checks and sets the text fields shared by saving and editing. */
+    private static void applyFields(MedicalRecord record, String name, String date, String medicalType,
+                                    String hospitalName, String drName, String address, String diagnosticCenter,
+                                    String details, String diagAddress) {
+        record.setName(required(name, 100, "Name"));
+        record.setCreatedDate(parseDate(date).atStartOfDay()); // created_date = the Date typed on the form
+        record.setMedicalType(MedicalTypes.find(required(medicalType, 100, "Medical type"))
+                .orElseThrow(() -> new InvalidInputException("Please choose the medical type from the list")));
+        record.setHospitalName(optional(hospitalName, 150, "Hospital name"));
+        record.setDrName(optional(drName, 100, "Dr name"));
+        record.setAddress(optional(address, 255, "Address"));
+        record.setDiagnosticCenter(optional(diagnosticCenter, 150, "Diagnostic center"));
+        record.setDetails(optional(details, 1000, "Details"));
+        record.setDiagAddress(optional(diagAddress, 255, "Diag address"));
+    }
+
     /** Adds every non-empty uploaded file of one document type to the record. */
     private static void addFiles(MedicalRecord record, List<MultipartFile> files, String category, String label)
             throws IOException {
+        List<RecordAttachment> list = new ArrayList<>();
+        collectFiles(list, files, category, label);
+        list.forEach(record::addAttachment);
+    }
+
+    /** Checks the uploaded files of one document type and adds them to the list. */
+    private static void collectFiles(List<RecordAttachment> out, List<MultipartFile> files, String category,
+                                     String label) throws IOException {
         if (files == null) {
             return;
         }
@@ -184,7 +245,7 @@ public class RecordController {
             throw new InvalidInputException(label + ": you can upload at most " + MAX_FILES_PER_TYPE + " files");
         }
         for (MultipartFile file : uploaded) {
-            record.addAttachment(toAttachment(file, category, label));
+            out.add(toAttachment(file, category, label));
         }
     }
 
@@ -210,8 +271,8 @@ public class RecordController {
         }
     }
 
-    @ExceptionHandler(InvalidInputException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalid(InvalidInputException ex) {
+    @ExceptionHandler({InvalidInputException.class, IllegalArgumentException.class})
+    public ResponseEntity<Map<String, Object>> handleInvalid(RuntimeException ex) {
         return ResponseEntity.badRequest().body(Map.of("success", false, "message", ex.getMessage()));
     }
 }

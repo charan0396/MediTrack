@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 /** One medicine row for the "Medicines" view. prescriptionFileName is null when no prescription file was attached. */
 public record MedicineRow(
         Long id,
+        String prescriptionRef,
         LocalDateTime createdDate,
         LocalDate medDate,
         String name,

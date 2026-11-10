@@ -21,10 +21,10 @@
         { label: 'Name', key: 'name' },
         { label: 'Description', key: 'description', cls: 'desc' },
         { label: 'Amount', key: 'amount', money: true, cls: 'num' },
-        /*{ label: 'Created By', key: 'createdBy' },
+        { label: 'Created By', key: 'createdBy' },
         { label: 'Created Date', key: 'createdDate', dateTime: true, cls: 'nowrap' },
         { label: 'Updated By', key: 'updatedBy', edited: true },
-        { label: 'Updated Date', key: 'updatedDate', dateTime: true, edited: true, cls: 'nowrap' },*/
+        { label: 'Updated Date', key: 'updatedDate', dateTime: true, edited: true, cls: 'nowrap' },
         { label: 'Action', action: true }
     ];
 

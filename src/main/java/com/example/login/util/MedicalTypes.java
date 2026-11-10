@@ -30,7 +30,8 @@ public final class MedicalTypes {
             "Optometrist",
             "Radiologist",
             "ENT Specialist",
-            "Plastic Surgeon");
+            "Plastic Surgeon",
+            "Diabetologist");
 
     private MedicalTypes() {
     }

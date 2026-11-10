@@ -19,6 +19,9 @@ import java.util.stream.Collectors;
 @Service
 public class RecordService {
 
+    /** Most files for one document type in one record (same as the controller). */
+    private static final int MAX_FILES_PER_TYPE = 10;
+
     private final MedicalRecordRepository records;
     private final RecordAttachmentRepository attachments;
 
@@ -30,6 +33,42 @@ public class RecordService {
     @Transactional
     public MedicalRecord save(MedicalRecord record) {
         return records.save(record); // attachments are saved with it (cascade)
+    }
+
+    /**
+     * Edit a record: its text fields, remove some of its files and add new ones. Sets updated_by / updated_date.
+     * Returns false when the record does not exist or is not the user's (normal users edit only their own).
+     * Throws IllegalArgumentException when a document type would have more than 10 files.
+     */
+    @Transactional
+    public boolean update(Long id, String user, boolean allUsers, MedicalRecord changes,
+                          List<Long> removeFileIds, List<RecordAttachment> added) {
+        MedicalRecord record = records.findById(id).orElse(null);
+        if (record == null || (!allUsers && !user.equals(record.getCreatedBy()))) {
+            return false;
+        }
+        record.setName(changes.getName());
+        record.setCreatedDate(changes.getCreatedDate()); // created_date = the Date typed on the form
+        record.setMedicalType(changes.getMedicalType());
+        record.setHospitalName(changes.getHospitalName());
+        record.setDrName(changes.getDrName());
+        record.setAddress(changes.getAddress());
+        record.setDiagnosticCenter(changes.getDiagnosticCenter());
+        record.setDetails(changes.getDetails());
+        record.setDiagAddress(changes.getDiagAddress());
+
+        record.getAttachments().removeIf(a -> removeFileIds.contains(a.getId())); // orphan removal deletes them
+        added.forEach(record::addAttachment);
+        for (String category : List.of(RecordAttachment.PRESCRIPTION, RecordAttachment.BILL,
+                RecordAttachment.SCAN, RecordAttachment.OTHERS)) {
+            long count = record.getAttachments().stream().filter(a -> category.equals(a.getCategory())).count();
+            if (count > MAX_FILES_PER_TYPE) {
+                throw new IllegalArgumentException("A record can have at most " + MAX_FILES_PER_TYPE
+                        + " files for each document type (" + category + ")");
+            }
+        }
+        record.touch(user); // updated_by and updated_date
+        return true;
     }
 
     /** All records of one user, or of every user when allUsers is true (super user). */

@@ -471,9 +471,8 @@ table.data {
 /* ---------- Header: logged-in user ---------- */
 .user {
     color: #fff;
-    font-size: 20px;
+    font-size: 16px;
     white-space: nowrap;
-    text-transform: capitalize;
 }
 
 .user::before {
@@ -574,3 +573,12 @@ table.data {
 .misc-table .mini:hover { background: #1d4ea8; color: #fff; }
 .edit-banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 14px; padding: 10px 14px; border-radius: 8px; background: rgba(255, 200, 80, .18); border: 1px solid rgba(255, 210, 120, .6); }
 .edit-banner[hidden] { display: none; }
+
+/* Miscellaneous table: fits the screen width (no sideways scroll); long text wraps */
+.table-wrap:has(.misc-table) { overflow-x: hidden; }
+table.data.misc-table { min-width: 0; table-layout: auto; font-size: 13px; }
+.misc-table th { height: auto; padding: 8px 6px; white-space: normal; line-height: 1.2; }
+.misc-table td { height: auto; max-width: none; padding: 6px; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; line-height: 1.25; }
+.misc-table td.num, .misc-table td.nowrap { white-space: normal; }
+.misc-table td.desc { min-width: 0; max-width: none; }
+.misc-table td.serial, .misc-table th.serial { width: 1%; }

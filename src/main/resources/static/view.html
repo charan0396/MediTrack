@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediTrack - View Records</title>
     <link rel="stylesheet" href="css/records.css">
+    <link rel="stylesheet" href="css/rx.css">
 </head>
 <body>
 <main class="wrap wide">
@@ -13,11 +14,11 @@
         <span class="brand">MediTrack</span>
         <div class="line"></div>
         <span class="user" id="userName" title="Logged in user"></span>
-        <button type="button" id="homeBtn" class="nav-btn">Home</button>
-        <button type="button" id="viewBtn" class="nav-btn active" aria-current="page">View</button>
-        <button type="button" id="billBtn" class="nav-btn">Bill</button>
-        <button type="button" id="recordBtn" class="nav-btn">Record</button>
-        <button type="button" id="logoutBtn" class="nav-btn">Log out</button>
+        <button type="button" id="homeBtn" class="nav-btn">home</button>
+        <button type="button" id="viewBtn" class="nav-btn active" aria-current="page">view</button>
+        <button type="button" id="billBtn" class="nav-btn">bill</button>
+        <button type="button" id="recordBtn" class="nav-btn">record</button>
+        <button type="button" id="logoutBtn" class="nav-btn">logout</button>
     </header>
 
     <p id="scopeNote" class="note" hidden></p>
@@ -35,7 +36,12 @@
             </label>
         </div>
         <div id="filters" class="filters" role="group" aria-label="Filters"></div>
-        <button type="button" id="downloadBtn" class="nav-btn">Download</button>
+        <div id="dateFilter" class="filters" role="group" aria-label="Date range">
+            <label class="filter"><span>Date from</span><input type="date" id="dateFrom" class="input" aria-label="Date from"></label>
+            <label class="filter"><span>Date to</span><input type="date" id="dateTo" class="input" aria-label="Date to"></label>
+            <button type="button" id="dateClear" class="nav-btn">clear</button>
+        </div>
+        <button type="button" id="downloadBtn" class="nav-btn">download</button>
     </div>
 
     <div class="table-wrap" tabindex="0" aria-label="Saved records">
@@ -60,7 +66,50 @@
     </div>
 </div>
 
+<!-- Prescription popup: opens when a prescription file is chosen -->
+<div id="rxModal" class="modal" aria-hidden="true">
+    <div class="modal-box rx" role="dialog" aria-modal="true" aria-labelledby="rxTitle">
+        <div class="rx-head">
+            <h2 id="rxTitle">Prescription medicines</h2>
+            <span id="rxCount" class="rx-count"></span>
+        </div>
+        <div class="rx-body">
+            <div id="rxImage" class="rx-image" aria-label="Uploaded prescription"></div>
+            <form id="rxForm" autocomplete="off" novalidate>
+                <div class="rx-fields">
+                    <div class="f"><label for="rxDate">Date <span class="req">*</span></label>
+                        <input type="date" id="rxDate" class="input"></div>
+                    <div class="f"><label for="rxName">Name <span class="req">*</span></label>
+                        <input type="text" id="rxName" class="input" maxlength="100" data-case="title" data-suggest="name"></div>
+                    <div class="f"><label for="rxType">Medical Type <span class="req">*</span></label>
+                        <select id="rxType" class="input"></select></div>
+                    <div class="f"><label for="rxDr">Dr Name</label>
+                        <input type="text" id="rxDr" class="input" maxlength="100" data-case="title" data-suggest="dr"></div>
+                    <div class="f"><label for="rxHospital">Hospital Name</label>
+                        <input type="text" id="rxHospital" class="input" maxlength="150" data-case="title" data-suggest="hospital"></div>
+                </div>
+                <div class="rx-meds">
+                    <h3>Medicines</h3>
+                    <div class="rx-med-head"><span>S.No</span><span>Medicine</span><span>Medicine description</span><span>Morning</span><span>Afternoon</span><span>Night</span><span></span></div>
+                    <div id="rxMeds"></div>
+                    <button type="button" id="rxAdd" class="btn small secondary rx-add">+ Add medicine</button>
+                </div>
+                <div class="rx-actions">
+                    <button type="submit" id="rxSubmit" class="btn">Submit</button>
+                    <button type="button" id="rxCancel" class="btn secondary">Cancel</button>
+                    <button type="button" id="rxDiscard" class="btn secondary" title="Remove the chosen prescription file">Clear prescription</button>
+                    <p id="rxMsg" class="msg" role="alert"></p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="js/nav.js"></script>
+<script src="js/format.js"></script>
+<script src="js/suggest.js"></script>
+<script src="js/medical-types.js"></script>
+<script src="js/rx.js"></script>
 <script src="js/view.js"></script>
 </body>
 </html>
