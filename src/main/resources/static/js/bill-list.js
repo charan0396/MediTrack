@@ -7,8 +7,8 @@
     var FILTERS = [
         { key: 'name', label: 'Name', value: function (g) { return g.head.name; } },
         { key: 'shop', label: 'Medical Shop', value: function (g) { return g.head.medicalShop; } },
-      //  { key: 'invoice', label: 'Invoice Number', value: function (g) { return g.head.invoiceNumber; } },
-       // { key: 'product', label: 'Product', multi: true, value: function (g) { return g.lines.map(function (l) { return l.product; }); } },
+        { key: 'invoice', label: 'Invoice Number', value: function (g) { return g.head.invoiceNumber; } },
+        { key: 'product', label: 'Product', multi: true, value: function (g) { return g.lines.map(function (l) { return l.product; }); } },
         { key: 'status', label: 'Status', value: function (g) { return g.head.status || ''; }, blankLabel: 'No changes' }
     ];
 
