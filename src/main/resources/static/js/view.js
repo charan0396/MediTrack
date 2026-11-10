@@ -89,11 +89,11 @@
     // Rows that match every dropdown that is not on "All"
     function visibleRows() {
         return rows.filter(function (row) {
-            if (mode === 'medicines') {   // date range on the prescription Date
-                var d = row.medDate ? String(row.medDate).slice(0, 10) : '';
-                if (dateFrom.value && (!d || d < dateFrom.value)) return false;
-                if (dateTo.value && (!d || d > dateTo.value)) return false;
-            }
+            // date range on the "Date" column (records: createdDate, medicines: medDate)
+            var dv = row[mode === 'medicines' ? 'medDate' : 'createdDate'];
+            var d = dv ? String(dv).slice(0, 10) : '';
+            if (dateFrom.value && (!d || d < dateFrom.value)) return false;
+            if (dateTo.value && (!d || d > dateTo.value)) return false;
             return FILTERS.every(function (f) {
                 return !selected[f.key] || norm(row[f.key]) === selected[f.key];
             });
@@ -277,7 +277,6 @@
         COLUMNS = mode === 'medicines' ? MED_COLUMNS : RECORD_COLUMNS;
         FILTERS = mode === 'medicines' ? [] : RECORD_FILTERS;
         filtersBox.hidden = mode === 'medicines';
-        dateFilter.hidden = mode !== 'medicines';
         dateFrom.value = '';
         dateTo.value = '';
         selected = {};
